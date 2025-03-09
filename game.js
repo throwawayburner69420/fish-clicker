@@ -290,11 +290,25 @@ function initGame() {
     
     // Create and add click counter to the game area
     const gameArea = document.querySelector('.game-area');
-    const counter = document.createElement('div');
-    counter.id = 'clickCounter';
-    counter.className = 'click-counter';
-    counter.textContent = gameState.clickCount.toLocaleString();
-    gameArea.appendChild(counter);
+    if (gameArea) {
+        // Remove existing counter if it exists
+        const existingCounter = document.getElementById('clickCounter');
+        if (existingCounter) {
+            existingCounter.remove();
+        }
+        
+        // Create new counter
+        const counter = document.createElement('div');
+        counter.id = 'clickCounter';
+        counter.className = 'click-counter';
+        counter.textContent = `Clicks: ${gameState.clickCount.toLocaleString()}`;
+        gameArea.appendChild(counter);
+        
+        // Force a reflow to ensure the counter is visible
+        counter.style.opacity = '0';
+        counter.offsetHeight; // Force reflow
+        counter.style.opacity = '1';
+    }
 }
 
 // Handle fish click
@@ -306,7 +320,7 @@ function handleFishClick() {
     // Update click counter display
     const counter = document.getElementById('clickCounter');
     if (counter) {
-        counter.textContent = gameState.clickCount.toLocaleString();
+        counter.textContent = `Clicks: ${gameState.clickCount.toLocaleString()}`;
     }
     
     createBubbleParticle();

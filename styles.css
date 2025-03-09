@@ -159,7 +159,7 @@ body {
 
 .click-counter {
     position: absolute;
-    top: 30%;
+    top: 20%;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
@@ -167,14 +167,17 @@ body {
     gap: 5px;
     font-size: 24px;
     color: white;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 8px 15px;
-    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 12px;
     backdrop-filter: blur(5px);
-    z-index: 10;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    min-width: 80px;
+    z-index: 1000;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    min-width: 120px;
     justify-content: center;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    font-weight: 500;
 }
 
 .main-fish img {
