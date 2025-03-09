@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fish Clicker 🐠</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.abstract.xyz/sdk/latest/abstract-sdk.min.js"></script>
 </head>
 <body>
     <div class="game-container">
@@ -17,6 +18,7 @@
                 <span id="pearls">0</span> 💎
             </div>
             <button id="soundToggle" class="sound-toggle">🔊</button>
+            <button id="abstractWalletConnect" class="wallet-btn">Connect Abstract Wallet</button>
         </div>
 
         <!-- Main Game Area -->
@@ -33,23 +35,14 @@
         <!-- Shop and Upgrades -->
         <div class="shop-container">
             <div class="tabs">
-                <button class="tab-btn active" data-tab="fish">Fish</button>
-                <button class="tab-btn" data-tab="upgrades">Upgrades</button>
+                <button class="tab-btn active" data-tab="upgrades">Upgrades</button>
                 <button class="tab-btn" data-tab="nft">NFT Skins</button>
                 <button class="tab-btn" data-tab="shop">Weekly Shop</button>
                 <button class="tab-btn" data-tab="prestige">Prestige</button>
             </div>
 
-            <!-- Fish Shop -->
-            <div class="tab-content active" id="fishShop">
-                <h2>Fish Shop</h2>
-                <div class="shop-items" id="fishItems">
-                    <!-- Fish items will be added here dynamically -->
-                </div>
-            </div>
-
             <!-- Upgrades Shop -->
-            <div class="tab-content" id="upgradesShop">
+            <div class="tab-content active" id="upgradesShop">
                 <h2>Upgrades</h2>
                 <div class="shop-items" id="upgradeItems">
                     <!-- Upgrade items will be added here dynamically -->
@@ -63,6 +56,12 @@
                     <h3>Your Collection</h3>
                     <div class="nft-inventory-grid" id="nftInventory">
                         <!-- NFT skin items will be added here dynamically -->
+                    </div>
+                    <div class="nft-marketplace">
+                        <h3>Your Listed NFTs</h3>
+                        <div class="nft-marketplace-grid" id="listedNFTs">
+                            <!-- Listed NFTs will appear here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -98,6 +97,7 @@
         </div>
     </div>
 
+    <script src="abstract_integration.js"></script>
     <script src="nft_system.js"></script>
     <script src="game.js"></script>
 </body>

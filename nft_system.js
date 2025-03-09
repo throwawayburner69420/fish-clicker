@@ -89,7 +89,23 @@ let playerNFTState = {
     lastActiveCheck: Date.now()
 };
 
+// Initialize NFT System
+async function initNFTSystem() {
+    loadNFTState();
+    setupNFTEventListeners();
+    startActivityTracking();
+    
+    // Try to connect Abstract wallet if previously connected
+    if (localStorage.getItem('abstractWalletConnected') === 'true') {
+        await window.ABSTRACT_INTEGRATION.connectWallet();
+    }
+}
+
 // Activity Tracking
+function startActivityTracking() {
+    setInterval(updateActivePlayTime, NFT_CONFIG.ACTIVE_CHECK_INTERVAL);
+}
+
 function updateActivePlayTime() {
     const now = Date.now();
     const timeDiff = now - playerNFTState.lastActiveCheck;
@@ -104,38 +120,46 @@ function updateActivePlayTime() {
 }
 
 // NFT Drop System
-function checkForNFTDrop() {
-    if (playerNFTState.activePlayTime >= NFT_CONFIG.DROP_INTERVAL) {
-        const today = new Date().toDateString();
-        
-        if (playerNFTState.lastDrop !== today) {
-            playerNFTState.dropCount = 0;
-        }
-        
+async function checkForNFTDrop() {
+    const now = Date.now();
+    if (!playerNFTState.lastDrop || (now - playerNFTState.lastDrop) >= NFT_CONFIG.DROP_INTERVAL) {
         if (playerNFTState.dropCount < NFT_CONFIG.LIMITS.DAILY_DROPS) {
-            generateRandomSkinDrop();
-            playerNFTState.activePlayTime = 0;
-            playerNFTState.lastDrop = today;
+            const roll = Math.random();
+            let rarity;
+            
+            if (roll < NFT_CONFIG.DROP_RATES.LEGENDARY) rarity = 'LEGENDARY';
+            else if (roll < NFT_CONFIG.DROP_RATES.LEGENDARY + NFT_CONFIG.DROP_RATES.RARE) rarity = 'RARE';
+            else rarity = 'COMMON';
+            
+            const skin = getRandomSkinFromRarity(rarity);
+            await mintNFTDrop(skin);
+            
+            playerNFTState.lastDrop = now;
             playerNFTState.dropCount++;
             saveNFTState();
         }
     }
 }
 
-function generateRandomSkinDrop() {
-    const roll = Math.random();
-    let selectedSkin = null;
-    
-    if (roll < NFT_CONFIG.DROP_RATES.LEGENDARY) {
-        selectedSkin = getRandomSkinFromRarity('LEGENDARY');
-    } else if (roll < NFT_CONFIG.DROP_RATES.LEGENDARY + NFT_CONFIG.DROP_RATES.RARE) {
-        selectedSkin = getRandomSkinFromRarity('RARE');
-    } else {
-        selectedSkin = getRandomSkinFromRarity('COMMON');
-    }
-    
-    if (selectedSkin) {
-        mintNFTSkin(selectedSkin);
+async function mintNFTDrop(skin) {
+    try {
+        if (!window.ABSTRACT_INTEGRATION.isConnected()) {
+            showWalletConnectPrompt();
+            return;
+        }
+
+        const tx = await window.ABSTRACT_INTEGRATION.mintNFT(skin);
+        if (tx) {
+            playerNFTState.ownedSkins.push({
+                id: `${skin.id}_${Date.now()}`,
+                ...skin,
+                tokenId: tx.events.Transfer.returnValues.tokenId
+            });
+            showNFTDropPopup(skin);
+            saveNFTState();
+        }
+    } catch (error) {
+        console.error('Failed to mint NFT drop:', error);
     }
 }
 
@@ -144,27 +168,20 @@ function getRandomSkinFromRarity(rarity) {
     return skins[Math.floor(Math.random() * skins.length)];
 }
 
-// NFT Minting (to be connected to blockchain)
-async function mintNFTSkin(skin) {
-    try {
-        // This would connect to your blockchain contract
-        console.log(`Minting NFT: ${skin.name}`);
-        
-        // For now, we'll just add it to the player's state
-        playerNFTState.ownedSkins.push({
-            id: `${skin.id}_${Date.now()}`,
-            ...skin,
-            mintDate: new Date().toISOString()
-        });
-        
-        saveNFTState();
-        showNFTDropPopup(skin);
-    } catch (error) {
-        console.error('Error minting NFT:', error);
-    }
+// UI Functions
+function showWalletConnectPrompt() {
+    const popup = document.createElement('div');
+    popup.className = 'nft-drop-popup';
+    popup.innerHTML = `
+        <div class="nft-drop-content">
+            <h2>Connect Wallet</h2>
+            <p>Please connect your Abstract wallet to receive NFT drops!</p>
+            <button onclick="window.ABSTRACT_INTEGRATION.connectWallet()">Connect Wallet</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
 }
 
-// UI Functions
 function showNFTDropPopup(skin) {
     const popup = document.createElement('div');
     popup.className = 'nft-drop-popup';
@@ -175,11 +192,21 @@ function showNFTDropPopup(skin) {
             <h3>${skin.name}</h3>
             <p class="rarity ${skin.rarity}">${skin.rarity.toUpperCase()}</p>
             <p>${skin.description}</p>
-            <p>Boost: ${(skin.boostMultiplier - 1) * 100}% Click Value</p>
+            <p>Boost: +${(skin.boostMultiplier - 1) * 100}% Click Value</p>
             <button onclick="this.parentElement.parentElement.remove()">Awesome!</button>
         </div>
     `;
     document.body.appendChild(popup);
+}
+
+// Event Listeners
+function setupNFTEventListeners() {
+    document.getElementById('abstractWalletConnect').addEventListener('click', async () => {
+        const connected = await window.ABSTRACT_INTEGRATION.connectWallet();
+        if (connected) {
+            localStorage.setItem('abstractWalletConnected', 'true');
+        }
+    });
 }
 
 // Save/Load NFT State
@@ -194,17 +221,19 @@ function loadNFTState() {
     }
 }
 
-// Initialize NFT System
-function initNFTSystem() {
-    loadNFTState();
-    setInterval(updateActivePlayTime, NFT_CONFIG.ACTIVE_CHECK_INTERVAL);
-}
-
 // Export functions and constants
 window.NFT_SYSTEM = {
     init: initNFTSystem,
     config: NFT_CONFIG,
     skins: NFT_FISH_SKINS,
     shop: WEEKLY_SHOP,
-    state: playerNFTState
+    state: playerNFTState,
+    equipSkin: async (skinId) => {
+        const skin = playerNFTState.ownedSkins.find(s => s.id === skinId);
+        if (skin) {
+            playerNFTState.activeSkin = skinId;
+            document.getElementById('mainFishImg').src = skin.image;
+            saveNFTState();
+        }
+    }
 }; 

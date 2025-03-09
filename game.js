@@ -24,12 +24,128 @@ function createSound(type, frequency, duration, volume = 0.05) {
     oscillator.stop(audioContext.currentTime + duration);
 }
 
+// Create bubble sound
+function createBubbleSound() {
+    if (isSoundMuted) return;
+
+    // Create multiple oscillators for a richer sound
+    const mainOsc = audioContext.createOscillator();
+    const subOsc = audioContext.createOscillator();
+    const noiseOsc = audioContext.createOscillator();
+    
+    const mainGain = audioContext.createGain();
+    const subGain = audioContext.createGain();
+    const noiseGain = audioContext.createGain();
+    
+    // Create filters for shaping the sound
+    const mainFilter = audioContext.createBiquadFilter();
+    const subFilter = audioContext.createBiquadFilter();
+    const noiseFilter = audioContext.createBiquadFilter();
+
+    // Randomize the base frequency for variation
+    const baseFreq = 400 + Math.random() * 200;
+    
+    // Main bubble resonance
+    mainFilter.type = 'bandpass';
+    mainFilter.frequency.setValueAtTime(baseFreq * 2, audioContext.currentTime);
+    mainFilter.Q.value = 8;
+    
+    // Sub-frequency for depth
+    subFilter.type = 'bandpass';
+    subFilter.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
+    subFilter.Q.value = 4;
+    
+    // Noise filter for water texture
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(baseFreq * 3, audioContext.currentTime);
+    noiseFilter.Q.value = 2;
+
+    // Configure oscillators
+    mainOsc.type = 'sine';
+    mainOsc.frequency.setValueAtTime(baseFreq * 2, audioContext.currentTime);
+    mainOsc.frequency.exponentialRampToValueAtTime(baseFreq, audioContext.currentTime + 0.1);
+
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
+    subOsc.frequency.exponentialRampToValueAtTime(baseFreq * 0.5, audioContext.currentTime + 0.15);
+
+    noiseOsc.type = 'sawtooth';
+    noiseOsc.frequency.setValueAtTime(baseFreq * 3, audioContext.currentTime);
+
+    // Set up gain envelopes
+    mainGain.gain.setValueAtTime(0, audioContext.currentTime);
+    mainGain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02);
+    mainGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+
+    subGain.gain.setValueAtTime(0, audioContext.currentTime);
+    subGain.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+    subGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+
+    noiseGain.gain.setValueAtTime(0, audioContext.currentTime);
+    noiseGain.gain.linearRampToValueAtTime(0.05, audioContext.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+
+    // Connect nodes
+    mainOsc.connect(mainFilter);
+    mainFilter.connect(mainGain);
+    mainGain.connect(audioContext.destination);
+
+    subOsc.connect(subFilter);
+    subFilter.connect(subGain);
+    subGain.connect(audioContext.destination);
+
+    noiseOsc.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(audioContext.destination);
+
+    // Start and stop all oscillators
+    const startTime = audioContext.currentTime;
+    const duration = 0.2 + Math.random() * 0.1;
+    
+    mainOsc.start(startTime);
+    subOsc.start(startTime);
+    noiseOsc.start(startTime);
+    
+    mainOsc.stop(startTime + duration);
+    subOsc.stop(startTime + duration);
+    noiseOsc.stop(startTime + duration);
+
+    // Add a small chance of a secondary bubble sound
+    if (Math.random() < 0.3) {
+        setTimeout(() => {
+            const smallerDuration = 0.1;
+            const smallOsc = audioContext.createOscillator();
+            const smallGain = audioContext.createGain();
+            const smallFilter = audioContext.createBiquadFilter();
+
+            smallFilter.type = 'bandpass';
+            smallFilter.frequency.setValueAtTime(baseFreq * 1.5, audioContext.currentTime);
+            smallFilter.Q.value = 6;
+
+            smallOsc.type = 'sine';
+            smallOsc.frequency.setValueAtTime(baseFreq * 1.5, audioContext.currentTime);
+            smallOsc.frequency.exponentialRampToValueAtTime(baseFreq * 0.75, audioContext.currentTime + smallerDuration);
+
+            smallGain.gain.setValueAtTime(0, audioContext.currentTime);
+            smallGain.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+            smallGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + smallerDuration);
+
+            smallOsc.connect(smallFilter);
+            smallFilter.connect(smallGain);
+            smallGain.connect(audioContext.destination);
+
+            smallOsc.start(audioContext.currentTime);
+            smallOsc.stop(audioContext.currentTime + smallerDuration);
+        }, Math.random() * 100);
+    }
+}
+
 // Function to play sound
 function playSound(soundName) {
     switch(soundName) {
         case 'click':
-            // Soft, pleasant click
-            createSound('sine', 800, 0.05, 0.03); // Higher pitch, shorter duration, quieter
+            // Bubble pop sound
+            createBubbleSound();
             break;
         case 'purchase':
             // Happy purchase sound
@@ -60,41 +176,8 @@ let gameState = {
     prestigeLevel: 0,
     prestigeMultiplier: 1,
     lastSave: Date.now(),
-    fish: [],
     upgrades: [],
     achievements: []
-};
-
-// Fish types
-const FISH_TYPES = {
-    CLOWNFISH: {
-        id: 'clownfish',
-        name: 'Clownfish',
-        basePrice: 10,
-        incomePerSecond: 0.1,
-        description: 'A friendly clownfish that generates bubbles!'
-    },
-    ANGELFISH: {
-        id: 'angelfish',
-        name: 'Angelfish',
-        basePrice: 50,
-        incomePerSecond: 0.5,
-        description: 'Majestic angelfish with enhanced bubble production'
-    },
-    PUFFERFISH: {
-        id: 'pufferfish',
-        name: 'Pufferfish',
-        basePrice: 200,
-        incomePerSecond: 2,
-        description: 'Inflates to produce lots of bubbles!'
-    },
-    SHARK: {
-        id: 'shark',
-        name: 'Shark',
-        basePrice: 1000,
-        incomePerSecond: 10,
-        description: 'A powerful shark that generates tons of bubbles!'
-    }
 };
 
 // Upgrade types
@@ -102,32 +185,32 @@ const UPGRADE_TYPES = {
     GOLDEN_HOOK: {
         id: 'golden_hook',
         name: 'Golden Hook',
-        basePrice: 100,
+        basePrice: 250,
         effect: () => { 
-            gameState.clickValue *= 2;
+            gameState.clickValue *= 1.5;
             updateDisplay();
         },
-        description: 'Doubles your click value'
+        description: 'Increases your click value by 50%'
     },
     AUTO_CLICKER: {
         id: 'auto_clicker',
         name: 'Auto-Clicker Crab',
-        basePrice: 500,
+        basePrice: 2000,
         effect: () => { 
             startAutoClicker();
             updateDisplay();
         },
-        description: 'Automatically clicks every 5 seconds'
+        description: 'Automatically clicks every 10 seconds'
     },
     BUBBLE_MULTIPLIER: {
         id: 'bubble_multiplier',
         name: 'Bubble Multiplier',
-        basePrice: 1000,
+        basePrice: 5000,
         effect: () => {
-            gameState.clickValue *= 3;
+            gameState.clickValue *= 2;
             updateDisplay();
         },
-        description: 'Triples your click value'
+        description: 'Doubles your click value'
     }
 };
 
@@ -136,14 +219,14 @@ const ACHIEVEMENTS = {
     BUBBLE_MASTER: {
         id: 'bubble_master',
         name: 'Bubble Master',
-        description: 'Earn 1,000 bubbles in total',
-        check: () => gameState.bubbles >= 1000
+        description: 'Earn 2,500 bubbles in total',
+        check: () => gameState.bubbles >= 2500
     },
-    FISH_COLLECTOR: {
-        id: 'fish_collector',
-        name: 'Fish Collector',
-        description: 'Own 5 different fish',
-        check: () => gameState.fish.length >= 5
+    SKIN_COLLECTOR: {
+        id: 'skin_collector',
+        name: 'Skin Collector',
+        description: 'Own 3 different fish skins',
+        check: () => window.NFT_SYSTEM && window.NFT_SYSTEM.state && window.NFT_SYSTEM.state.ownedSkins.length >= 3
     }
 };
 
@@ -220,14 +303,6 @@ function startGameLoop() {
     setInterval(() => {
         const now = Date.now();
         const delta = (now - gameState.lastSave) / 1000;
-        
-        // Calculate idle income
-        let idleIncome = 0;
-        gameState.fish.forEach(fish => {
-            idleIncome += FISH_TYPES[fish.type].incomePerSecond * fish.count;
-        });
-        
-        gameState.bubbles += idleIncome * delta * gameState.prestigeMultiplier;
         gameState.lastSave = now;
         
         updateDisplay();
@@ -240,7 +315,7 @@ function updateDisplay() {
     document.getElementById('bubbles').textContent = Math.floor(gameState.bubbles);
     document.getElementById('pearls').textContent = gameState.pearls;
     document.getElementById('prestigeLevel').textContent = gameState.prestigeLevel;
-    document.getElementById('nextPrestigeBonus').textContent = `+${(gameState.prestigeLevel + 1) * 10}%`;
+    document.getElementById('nextPrestigeBonus').textContent = `+${(gameState.prestigeLevel + 1) * 5}%`;
     
     updateShop();
     updateNFTDisplay();
@@ -263,19 +338,19 @@ function switchTab(tabId) {
 
 // Prestige system
 function prestige() {
-    if (gameState.bubbles < 1000) return;
+    if (gameState.bubbles < 10000) return;
     
-    const pearlsToEarn = Math.floor(Math.log10(gameState.bubbles));
+    const pearlsToEarn = Math.floor(Math.log10(gameState.bubbles) - 3);
     
     if (confirm(`Are you sure you want to prestige? You will earn ${pearlsToEarn} pearls!`)) {
         gameState.pearls += pearlsToEarn;
         gameState.prestigeLevel++;
-        gameState.prestigeMultiplier = 1 + (gameState.prestigeLevel * 0.1);
+        gameState.prestigeMultiplier = 1 + (gameState.prestigeLevel * 0.05);
         
         // Reset game state
         gameState.bubbles = 0;
-        gameState.fish = [];
         gameState.upgrades = [];
+        gameState.clickValue = 1;
         
         playSound('prestige');
         updateDisplay();
@@ -324,33 +399,6 @@ function showAchievementPopup(achievement) {
 
 // Update shop display
 function updateShop() {
-    // Update fish shop
-    const fishShop = document.getElementById('fishItems');
-    fishShop.innerHTML = '';
-    
-    Object.entries(FISH_TYPES).forEach(([key, fish]) => {
-        const owned = gameState.fish.find(f => f.type === key) || { count: 0 };
-        const price = Math.floor(fish.basePrice * Math.pow(1.15, owned.count));
-        
-        const item = document.createElement('div');
-        item.className = 'shop-item';
-        if (gameState.bubbles < price) item.className += ' disabled';
-        
-        item.innerHTML = `
-            <h3>${fish.name}</h3>
-            <p>${fish.description}</p>
-            <p>Cost: ${price} bubbles</p>
-            <p>Income: ${fish.incomePerSecond}/sec</p>
-            <p>Owned: ${owned.count}</p>
-        `;
-        
-        if (gameState.bubbles >= price) {
-            item.addEventListener('click', () => purchaseFish(key));
-        }
-        
-        fishShop.appendChild(item);
-    });
-    
     // Update upgrades shop
     const upgradeShop = document.getElementById('upgradeItems');
     upgradeShop.innerHTML = '';
@@ -376,28 +424,6 @@ function updateShop() {
     });
 }
 
-// Purchase fish
-function purchaseFish(fishId) {
-    const fish = FISH_TYPES[fishId];
-    const owned = gameState.fish.find(f => f.type === fishId);
-    const price = Math.floor(fish.basePrice * Math.pow(1.15, owned ? owned.count : 0));
-    
-    if (gameState.bubbles >= price) {
-        gameState.bubbles -= price;
-        
-        if (owned) {
-            owned.count++;
-        } else {
-            gameState.fish.push({ type: fishId, count: 1 });
-        }
-        
-        playSound('purchase');
-        updateDisplay();
-        saveGame();
-        checkAchievements();
-    }
-}
-
 // Purchase upgrade
 function purchaseUpgrade(upgradeId) {
     const upgrade = UPGRADE_TYPES[upgradeId];
@@ -421,7 +447,7 @@ function startAutoClicker() {
     if (!autoClickerInterval) {
         autoClickerInterval = setInterval(() => {
             handleFishClick();
-        }, 5000);
+        }, 10000);
     }
 }
 

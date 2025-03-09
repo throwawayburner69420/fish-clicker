@@ -397,4 +397,77 @@ body {
     .shop-items {
         grid-template-columns: 1fr;
     }
+}
+
+.wallet-btn {
+    background: linear-gradient(45deg, #2196F3, #00BCD4);
+    border: none;
+    padding: 8px 16px;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 20px;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.wallet-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #1976D2, #0097A7);
+}
+
+.wallet-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.nft-marketplace {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.nft-marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.listed-nft-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.listed-nft-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.listed-nft-card .price {
+    font-size: 18px;
+    color: #4CAF50;
+    margin: 10px 0;
+}
+
+.listed-nft-card .cancel-listing {
+    background: linear-gradient(45deg, #f44336, #d32f2f);
+    border: none;
+    padding: 8px 16px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    width: 100%;
+}
+
+.listed-nft-card .cancel-listing:hover {
+    background: linear-gradient(45deg, #d32f2f, #b71c1c);
 } 
