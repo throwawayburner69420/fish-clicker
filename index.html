@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fish Clicker 🐠</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.abstract.xyz/sdk/latest/abstract-sdk.min.js"></script>
+    <!-- Load Privy integration -->
+    <script src="privy-integration.js"></script>
+    <!-- Load local mock Abstract SDK -->
+    <script src="abstract-sdk.js"></script>
 </head>
 <body>
     <div class="game-container">
@@ -18,7 +21,10 @@
                 <span id="pearls">0</span> 💎
             </div>
             <button id="soundToggle" class="sound-toggle">🔊</button>
-            <button id="abstractWalletConnect" class="wallet-btn">Connect Abstract Wallet</button>
+            <button id="abstractWalletConnect" class="wallet-btn">
+                <span class="wallet-btn-text">Connect Wallet</span>
+                <span class="wallet-btn-loading" style="display: none;">Connecting...</span>
+            </button>
         </div>
 
         <!-- Main Game Area -->
@@ -97,6 +103,16 @@
         </div>
     </div>
 
+    <script>
+        // Check Abstract SDK loading status
+        window.addEventListener('load', () => {
+            if (!window.AbstractWallet) {
+                console.error('Abstract SDK failed to load');
+                document.getElementById('abstractWalletConnect').classList.add('error');
+                document.querySelector('.wallet-btn-text').textContent = 'SDK Load Error';
+            }
+        });
+    </script>
     <script src="abstract_integration.js"></script>
     <script src="nft_system.js"></script>
     <script src="game.js"></script>

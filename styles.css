@@ -5,46 +5,51 @@ body {
     font-family: 'Arial', sans-serif;
     background: linear-gradient(180deg, #006994 0%, #003366 100%);
     color: white;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .game-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px;
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: 20px;
+    grid-template-rows: 40px 1fr 340px;
+    gap: 10px;
     height: 100vh;
+    box-sizing: border-box;
 }
 
 /* Currency Display */
 .currency-container {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    font-size: 24px;
+    align-items: center;
+    padding: 0 15px;
     background: rgba(0, 0, 0, 0.3);
-    padding: 10px;
-    border-radius: 15px;
+    border-radius: 8px;
     backdrop-filter: blur(5px);
+    height: 40px;
+    position: relative;
+    z-index: 100;
 }
 
 .currency {
     display: flex;
     align-items: center;
     gap: 5px;
+    font-size: 16px;
+    margin-right: 15px;
 }
 
 .sound-toggle {
     background: none;
     border: none;
     color: white;
-    font-size: 24px;
+    font-size: 16px;
     cursor: pointer;
-    padding: 5px;
+    padding: 4px;
     transition: transform 0.2s;
-    margin-left: 20px;
+    margin-left: auto;
 }
 
 .sound-toggle:hover {
@@ -55,19 +60,117 @@ body {
     opacity: 0.5;
 }
 
+.wallet-btn {
+    background: #00b167;
+    border: none;
+    padding: 4px 10px;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer !important;
+    font-size: 12px;
+    margin-left: 10px;
+    transition: transform 0.2s, background 0.3s;
+    min-width: 100px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 101;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+}
+
+.wallet-btn:hover {
+    transform: scale(1.02);
+    background: #009e5c;
+}
+
+.wallet-btn.connected {
+    background: #00986c;
+    font-size: 11px;
+    padding: 4px 8px;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+}
+
+.wallet-btn.connected:hover {
+    background: #d32f2f;
+    transform: scale(1.02);
+}
+
+.wallet-btn:disabled,
+.wallet-btn.connected:disabled,
+.wallet-btn.loading:disabled {
+    opacity: 1 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    background: inherit;
+}
+
+.wallet-btn.loading {
+    opacity: 0.9;
+    cursor: wait !important;
+}
+
+.wallet-btn-text,
+.wallet-btn-loading {
+    pointer-events: none;
+    user-select: none;
+}
+
+.wallet-btn.error {
+    background: #f44336;
+}
+
+.wallet-btn-loading {
+    display: none;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 /* Game Area */
 .game-area {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 400px;
+    flex: 1;
+    min-height: 0;
 }
 
 .main-fish {
     cursor: pointer;
     transition: transform 0.1s;
     position: relative;
+}
+
+.click-counter {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 16px;
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
+    z-index: 10;
 }
 
 .main-fish img {
@@ -108,52 +211,71 @@ body {
 /* Shop Container */
 .shop-container {
     background: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 12px;
     backdrop-filter: blur(5px);
+    height: 340px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tab-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
-    padding: 10px 20px;
+    padding: 8px 16px;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .tab-btn.active {
     background: rgba(255, 255, 255, 0.3);
+    transform: translateY(1px);
 }
 
+/* Content Areas */
 .tab-content {
     display: none;
+    height: calc(100% - 45px);
+    overflow: hidden;
+    padding: 0;
 }
 
 .tab-content.active {
     display: block;
 }
 
-/* Shop Items */
+/* Shop Items Grid */
 .shop-items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
 }
 
 .shop-item {
     background: rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.2s;
+    border-radius: 8px;
+    padding: 8px;
+    height: 190px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .shop-item:hover {
@@ -184,18 +306,15 @@ body {
 
 /* Prestige Button */
 .prestige-btn {
+    margin-top: 15px;
+    padding: 10px 25px;
+    font-size: 14px;
     background: linear-gradient(45deg, #FFD700, #FFA500);
     border: none;
-    padding: 15px 30px;
     color: white;
     border-radius: 25px;
-    font-size: 18px;
     cursor: pointer;
     transition: transform 0.2s;
-}
-
-.prestige-btn:hover {
-    transform: scale(1.05);
 }
 
 /* NFT System Styles */
@@ -242,26 +361,56 @@ body {
     margin: 10px 0;
 }
 
-.nft-drop-content .rarity {
+.nft-drop-content .rarity,
+.shop-nft-card .nft-rarity {
     font-weight: bold;
     padding: 5px 10px;
     border-radius: 5px;
     display: inline-block;
 }
 
-.nft-drop-content .rarity.common {
+.nft-drop-content .rarity.normal,
+.shop-nft-card .nft-rarity.normal {
+    background: #808080;
+    color: #fff;
+}
+
+.nft-drop-content .rarity.common,
+.shop-nft-card .nft-rarity.common {
     background: #4a4a4a;
     color: #fff;
 }
 
-.nft-drop-content .rarity.rare {
+.nft-drop-content .rarity.uncommon,
+.shop-nft-card .nft-rarity.uncommon {
+    background: #2e7d32;
+    color: #fff;
+}
+
+.nft-drop-content .rarity.rare,
+.shop-nft-card .nft-rarity.rare {
     background: #0066cc;
     color: #fff;
 }
 
-.nft-drop-content .rarity.legendary {
+.nft-drop-content .rarity.epic,
+.shop-nft-card .nft-rarity.epic {
+    background: linear-gradient(45deg, #9c27b0, #673ab7);
+    color: #fff;
+}
+
+.nft-drop-content .rarity.ultra_rare,
+.shop-nft-card .nft-rarity.ultra_rare {
+    background: linear-gradient(45deg, #00bcd4, #2196f3);
+    color: #fff;
+    animation: glow 2s infinite;
+}
+
+.nft-drop-content .rarity.legendary,
+.shop-nft-card .nft-rarity.legendary {
     background: linear-gradient(45deg, #ffd700, #ff8c00);
     color: #fff;
+    animation: glow 1.5s infinite;
 }
 
 .nft-drop-content button {
@@ -282,26 +431,25 @@ body {
 
 /* NFT Inventory Styles */
 .nft-inventory {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
-    padding: 20px;
-    margin-top: 20px;
+    height: 100%;
 }
 
 .nft-inventory-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
 }
 
 .nft-skin-card {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 8px;
+    padding: 8px;
     text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .nft-skin-card:hover {
@@ -310,10 +458,9 @@ body {
 }
 
 .nft-skin-card img {
-    width: 100px;
-    height: 100px;
-    border-radius: 5px;
-    margin-bottom: 10px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 4px;
 }
 
 .nft-skin-card.active {
@@ -322,54 +469,94 @@ body {
 
 /* Weekly Shop Styles */
 .weekly-shop {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
-    padding: 20px;
-    margin-top: 20px;
+    height: 100%;
+    padding: 0;
 }
 
 .weekly-shop-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 15px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 5px;
 }
 
 .shop-nft-card {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 8px;
+    padding: 8px;
     text-align: center;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .shop-nft-card img {
-    width: 150px;
-    height: 150px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 4px;
 }
 
-.shop-nft-card button {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
+.shop-nft-card .nft-name {
+    font-size: 12px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.shop-nft-card .nft-description {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 2px 0;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 95%;
+}
+
+.shop-nft-card .nft-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #00b167;
+    margin: 8px 0;
+    padding: 4px 12px;
+    background: rgba(0, 177, 103, 0.1);
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.shop-nft-card .mint-button {
+    padding: 8px 16px;
+    font-size: 12px;
+    background: linear-gradient(45deg, #00b167, #009e5c);
     border: none;
-    padding: 10px 20px;
     color: white;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 10px;
-    width: 100%;
-    font-size: 16px;
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
+    width: fit-content;
+    min-width: 60px;
+    margin: 8px auto 0;
 }
 
-.shop-nft-card button:hover {
-    transform: scale(1.05);
+.shop-nft-card .mint-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 177, 103, 0.3);
+    background: linear-gradient(45deg, #00c472, #00b167);
 }
 
-.shop-nft-card button:disabled {
+.shop-nft-card .mint-button:disabled {
     background: #666;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
+}
+
+.shop-nft-card .mint-button:disabled:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 @keyframes fadeIn {
@@ -380,6 +567,18 @@ body {
     to {
         opacity: 1;
         transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
     }
 }
 
@@ -399,75 +598,119 @@ body {
     }
 }
 
-.wallet-btn {
-    background: linear-gradient(45deg, #2196F3, #00BCD4);
-    border: none;
-    padding: 8px 16px;
-    color: white;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-left: 20px;
-    transition: transform 0.2s, background 0.3s;
-}
-
-.wallet-btn:hover {
-    transform: scale(1.05);
-    background: linear-gradient(45deg, #1976D2, #0097A7);
-}
-
-.wallet-btn:disabled {
-    background: #666;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.nft-marketplace {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
+/* Prestige Section */
+.prestige-info {
     padding: 20px;
-    margin-top: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.prestige-info p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Scrollbar styling */
+.tab-content::-webkit-scrollbar,
+.shop-items::-webkit-scrollbar,
+.weekly-shop::-webkit-scrollbar,
+.nft-inventory::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tab-content::-webkit-scrollbar-thumb,
+.shop-items::-webkit-scrollbar-thumb,
+.weekly-shop::-webkit-scrollbar-thumb,
+.nft-inventory::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover,
+.shop-items::-webkit-scrollbar-thumb:hover,
+.weekly-shop::-webkit-scrollbar-thumb:hover,
+.nft-inventory::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* NFT Marketplace */
+.nft-marketplace {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
 }
 
 .nft-marketplace-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 15px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
 }
 
 .listed-nft-card {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 8px;
+    padding: 8px;
     text-align: center;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .listed-nft-card img {
-    width: 150px;
-    height: 150px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 4px;
 }
 
 .listed-nft-card .price {
-    font-size: 18px;
+    font-size: 12px;
     color: #4CAF50;
-    margin: 10px 0;
+    margin: 4px 0;
 }
 
 .listed-nft-card .cancel-listing {
-    background: linear-gradient(45deg, #f44336, #d32f2f);
-    border: none;
-    padding: 8px 16px;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-    font-size: 14px;
-    width: 100%;
+    padding: 4px 8px;
+    font-size: 11px;
 }
 
-.listed-nft-card .cancel-listing:hover {
-    background: linear-gradient(45deg, #d32f2f, #b71c1c);
+/* Make headings smaller */
+h2 {
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    color: #fff;
+}
+
+h3 {
+    font-size: 14px;
+    margin: 0 0 8px 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Weekly Shop */
+.weekly-shop h2 {
+    font-size: 14px;
+    margin: 0 0 6px 0;
+}
+
+.weekly-shop h3 {
+    font-size: 12px;
+    margin: 0 0 6px 5px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Wallet button connected state */
+.wallet-btn.connected:hover {
+    background: #d32f2f;
+}
+
+.wallet-btn-text,
+.wallet-btn-loading {
+    pointer-events: none;
 } 

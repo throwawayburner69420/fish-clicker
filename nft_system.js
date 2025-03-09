@@ -1,37 +1,61 @@
 // NFT System Configuration
 const NFT_CONFIG = {
     DROP_RATES: {
-        COMMON: 0.80,    // 80% chance
-        RARE: 0.15,      // 15% chance
-        LEGENDARY: 0.05   // 5% chance
+        NORMAL: 0.70,      // 70% chance
+        COMMON: 0.25,      // 25% chance
+        UNCOMMON: 0.0489,  // 4.89% chance
+        RARE: 0.001,       // 0.1% chance
+        EPIC: 0.0001,      // 0.01% chance
+        ULTRA_RARE: 0.0000025, // 1 in 400,000
+        LEGENDARY: 0.0000001   // 1 in 10,000,000
     },
     LIMITS: {
         DAILY_DROPS: 24,
         WEEKLY_PURCHASES: 3
     },
+    DROP_INTERVAL: 10800000,  // 3 hours in milliseconds
     ACTIVE_CHECK_INTERVAL: 60000, // Check activity every minute
-    INACTIVE_THRESHOLD: 300000,   // 5 minutes of inactivity
-    DROP_INTERVAL: 3600000        // 1 hour for drops
+    INACTIVE_THRESHOLD: 300000    // 5 minutes of inactivity
 };
 
 // NFT Fish Skin Catalog
 const NFT_FISH_SKINS = {
+    NORMAL: {
+        BASIC_FISH: {
+            id: 'basic_fish',
+            name: 'Basic Fish',
+            rarity: 'normal',
+            description: 'A regular fish swimming in the sea',
+            image: 'assets/skins/basic_fish.png',
+            available: false // Artwork needed
+        }
+    },
     COMMON: {
         NEON_FISH: {
             id: 'neon_fish',
             name: 'Neon Fish',
             rarity: 'common',
-            boostMultiplier: 1.1,
             description: 'A vibrant, glowing fish that lights up the deep',
-            image: 'assets/skins/neon_fish.png'
+            image: 'assets/skins/neon_fish.png',
+            available: true
         },
         PIXEL_FISH: {
             id: 'pixel_fish',
             name: 'Pixel Fish',
             rarity: 'common',
-            boostMultiplier: 1.1,
             description: 'A retro-styled fish from the 8-bit era',
-            image: 'assets/skins/pixel_fish.png'
+            image: 'assets/skins/pixel_fish.png',
+            available: true
+        }
+    },
+    UNCOMMON: {
+        ROBOT_FISH: {
+            id: 'robot_fish',
+            name: 'Robot Fish',
+            rarity: 'uncommon',
+            description: 'A mechanical fish with gears and circuits',
+            image: 'assets/skins/robot_fish.png',
+            available: false // Artwork needed
         }
     },
     RARE: {
@@ -39,17 +63,29 @@ const NFT_FISH_SKINS = {
             id: 'golden_fish',
             name: 'Golden Fish',
             rarity: 'rare',
-            boostMultiplier: 1.25,
             description: 'A magnificent golden fish that brings prosperity',
-            image: 'assets/skins/golden_fish.png'
-        },
+            image: 'assets/skins/golden_fish.png',
+            available: true
+        }
+    },
+    EPIC: {
         CRYSTAL_FISH: {
             id: 'crystal_fish',
             name: 'Crystal Fish',
-            rarity: 'rare',
-            boostMultiplier: 1.25,
+            rarity: 'epic',
             description: 'A translucent fish made of pure crystal',
-            image: 'assets/skins/crystal_fish.png'
+            image: 'assets/skins/crystal_fish.png',
+            available: true
+        }
+    },
+    ULTRA_RARE: {
+        GALAXY_FISH: {
+            id: 'galaxy_fish',
+            name: 'Galaxy Fish',
+            rarity: 'ultra_rare',
+            description: 'A cosmic fish containing an entire universe within',
+            image: 'assets/skins/galaxy_fish.png',
+            available: false // Artwork needed
         }
     },
     LEGENDARY: {
@@ -57,9 +93,9 @@ const NFT_FISH_SKINS = {
             id: 'rainbow_fish',
             name: 'Rainbow Fish',
             rarity: 'legendary',
-            boostMultiplier: 1.5,
             description: 'A mythical fish that radiates prismatic energy',
-            image: 'assets/skins/rainbow_fish.png'
+            image: 'assets/skins/rainbow_fish.png',
+            available: true
         }
     }
 };
@@ -89,17 +125,178 @@ let playerNFTState = {
     lastActiveCheck: Date.now()
 };
 
-// Initialize NFT System
-async function initNFTSystem() {
-    loadNFTState();
-    setupNFTEventListeners();
-    startActivityTracking();
-    
-    // Try to connect Abstract wallet if previously connected
-    if (localStorage.getItem('abstractWalletConnected') === 'true') {
-        await window.ABSTRACT_INTEGRATION.connectWallet();
+class NFTSystem {
+    constructor() {
+        this.ownedSkins = new Set();
+        this.activeSkin = null;
+        this.initializeWeeklyShop();
+    }
+
+    initializeWeeklyShop() {
+        const shopContainer = document.querySelector('#weeklyShop');
+        if (!shopContainer) {
+            console.error('Weekly shop container not found');
+            return;
+        }
+
+        // Only clear and reinitialize if the container is empty
+        if (shopContainer.children.length === 0) {
+            // Directly display Golden Fish and Rainbow Fish
+            const displaySkins = [
+                NFT_FISH_SKINS.RARE.GOLDEN_FISH,
+                NFT_FISH_SKINS.LEGENDARY.RAINBOW_FISH
+            ];
+            
+            displaySkins.forEach(skin => {
+                const card = document.createElement('div');
+                card.className = 'shop-nft-card';
+                card.innerHTML = `
+                    <img src="${skin.image}" alt="${skin.name}">
+                    <div class="nft-name">${skin.name}</div>
+                    <div class="nft-description">${skin.description}</div>
+                    <div class="nft-rarity ${skin.rarity}">${skin.rarity.toUpperCase()}</div>
+                    <div class="nft-price">1 USDC</div>
+                    <button class="mint-button" onclick="nftSystem.mintSkin('${skin.id}')">Buy</button>
+                `;
+                shopContainer.appendChild(card);
+            });
+        }
+    }
+
+    async mintSkin(skinId) {
+        // Find the skin in the NFT catalog
+        let skin;
+        for (const rarity in NFT_FISH_SKINS) {
+            for (const key in NFT_FISH_SKINS[rarity]) {
+                if (NFT_FISH_SKINS[rarity][key].id === skinId) {
+                    skin = NFT_FISH_SKINS[rarity][key];
+                    break;
+                }
+            }
+            if (skin) break;
+        }
+        
+        if (!skin) return;
+        
+        // Check if connected to wallet
+        if (!window.privyWalletManager?.isConnected) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
+        try {
+            // Simulate minting process
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = 'Minting...';
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            this.ownedSkins.add(skinId);
+            this.updateInventory();
+            
+            button.textContent = 'Minted!';
+        } catch (error) {
+            console.error('Failed to mint NFT:', error);
+            button.textContent = 'Mint Failed';
+        }
+    }
+
+    updateInventory() {
+        const inventoryGrid = document.querySelector('.nft-inventory-grid');
+        if (!inventoryGrid) return;
+
+        inventoryGrid.innerHTML = '';
+        
+        this.ownedSkins.forEach(skinId => {
+            // Find skin in NFT catalog
+            let skin;
+            for (const rarity in NFT_FISH_SKINS) {
+                for (const key in NFT_FISH_SKINS[rarity]) {
+                    if (NFT_FISH_SKINS[rarity][key].id === skinId) {
+                        skin = NFT_FISH_SKINS[rarity][key];
+                        break;
+                    }
+                }
+                if (skin) break;
+            }
+            
+            if (!skin) return;
+            
+            const card = document.createElement('div');
+            card.className = `nft-skin-card ${this.activeSkin === skinId ? 'active' : ''}`;
+            card.innerHTML = `
+                <img src="${skin.image}" alt="${skin.name}">
+                <div class="nft-name">${skin.name}</div>
+                <button onclick="nftSystem.equipSkin('${skinId}')">${this.activeSkin === skinId ? 'Equipped' : 'Equip'}</button>
+            `;
+            inventoryGrid.appendChild(card);
+        });
+    }
+
+    equipSkin(skinId) {
+        if (!this.ownedSkins.has(skinId)) return;
+        
+        this.activeSkin = this.activeSkin === skinId ? null : skinId;
+        this.updateInventory();
+        
+        // Update main fish appearance
+        const mainFishImg = document.getElementById('mainFishImg');
+        if (mainFishImg) {
+            mainFishImg.src = this.activeSkin ? this.skins[this.activeSkin].image : 'assets/fish.png';
+        }
     }
 }
+
+// Initialize NFT System
+document.addEventListener('DOMContentLoaded', () => {
+    window.nftSystem = new NFTSystem();
+    
+    // Set up tab switching to reinitialize shop when weekly shop tab is shown
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            if (e.target.dataset.tab === 'shop') {
+                // Only initialize if the shop container is empty
+                const shopContainer = document.querySelector('#weeklyShop');
+                if (shopContainer && shopContainer.children.length === 0) {
+                    window.nftSystem.initializeWeeklyShop();
+                }
+            }
+        });
+    });
+});
+
+// Make sure NFTSystem is available globally
+if (!window.NFTSystem) {
+    window.NFTSystem = NFTSystem;
+}
+
+// Export functions and constants
+window.NFT_SYSTEM = {
+    init: () => {
+        if (!window.nftSystem) {
+            window.nftSystem = new NFTSystem();
+        }
+        // Only initialize if the shop container is empty
+        const shopContainer = document.querySelector('#weeklyShop');
+        if (shopContainer && shopContainer.children.length === 0) {
+            window.nftSystem.initializeWeeklyShop();
+        }
+    },
+    config: NFT_CONFIG,
+    skins: NFT_FISH_SKINS,
+    shop: WEEKLY_SHOP,
+    state: playerNFTState,
+    equipSkin: async (skinId) => {
+        const skin = playerNFTState.ownedSkins.find(s => s.id === skinId);
+        if (skin) {
+            playerNFTState.activeSkin = skinId;
+            document.getElementById('mainFishImg').src = skin.image;
+            saveNFTState();
+        }
+    }
+};
 
 // Activity Tracking
 function startActivityTracking() {
@@ -123,19 +320,24 @@ function updateActivePlayTime() {
 async function checkForNFTDrop() {
     const now = Date.now();
     if (!playerNFTState.lastDrop || (now - playerNFTState.lastDrop) >= NFT_CONFIG.DROP_INTERVAL) {
-        if (playerNFTState.dropCount < NFT_CONFIG.LIMITS.DAILY_DROPS) {
-            const roll = Math.random();
-            let rarity;
-            
-            if (roll < NFT_CONFIG.DROP_RATES.LEGENDARY) rarity = 'LEGENDARY';
-            else if (roll < NFT_CONFIG.DROP_RATES.LEGENDARY + NFT_CONFIG.DROP_RATES.RARE) rarity = 'RARE';
-            else rarity = 'COMMON';
-            
-            const skin = getRandomSkinFromRarity(rarity);
+        const roll = Math.random();
+        let rarity;
+        let cumulativeChance = 0;
+        
+        // Check rarity based on cumulative probabilities
+        for (const [rarityType, chance] of Object.entries(NFT_CONFIG.DROP_RATES)) {
+            cumulativeChance += chance;
+            if (roll < cumulativeChance) {
+                rarity = rarityType;
+                break;
+            }
+        }
+        
+        // Get a random skin, falling back to common if the chosen rarity has no available skins
+        const skin = getRandomSkinFromRarity(rarity);
+        if (skin) {
             await mintNFTDrop(skin);
-            
             playerNFTState.lastDrop = now;
-            playerNFTState.dropCount++;
             saveNFTState();
         }
     }
@@ -164,7 +366,11 @@ async function mintNFTDrop(skin) {
 }
 
 function getRandomSkinFromRarity(rarity) {
-    const skins = Object.values(NFT_FISH_SKINS[rarity]);
+    const skins = Object.values(NFT_FISH_SKINS[rarity]).filter(skin => skin.available);
+    if (skins.length === 0) {
+        // If no skins are available in the chosen rarity, fall back to a common skin
+        return getRandomSkinFromRarity('COMMON');
+    }
     return skins[Math.floor(Math.random() * skins.length)];
 }
 
@@ -201,10 +407,26 @@ function showNFTDropPopup(skin) {
 
 // Event Listeners
 function setupNFTEventListeners() {
-    document.getElementById('abstractWalletConnect').addEventListener('click', async () => {
-        const connected = await window.ABSTRACT_INTEGRATION.connectWallet();
-        if (connected) {
-            localStorage.setItem('abstractWalletConnected', 'true');
+    const connectButton = document.getElementById('abstractWalletConnect');
+    
+    connectButton.addEventListener('click', async () => {
+        try {
+            // Show loading state
+            connectButton.classList.add('loading');
+            connectButton.disabled = true;
+            
+            const connected = await window.ABSTRACT_INTEGRATION.connectWallet();
+            
+            if (connected) {
+                localStorage.setItem('abstractWalletConnected', 'true');
+            }
+        } catch (error) {
+            console.error('Error connecting wallet:', error);
+            showError('Failed to connect wallet. Please try again.');
+        } finally {
+            // Remove loading state
+            connectButton.classList.remove('loading');
+            connectButton.disabled = false;
         }
     });
 }
@@ -219,21 +441,4 @@ function loadNFTState() {
     if (savedState) {
         playerNFTState = JSON.parse(savedState);
     }
-}
-
-// Export functions and constants
-window.NFT_SYSTEM = {
-    init: initNFTSystem,
-    config: NFT_CONFIG,
-    skins: NFT_FISH_SKINS,
-    shop: WEEKLY_SHOP,
-    state: playerNFTState,
-    equipSkin: async (skinId) => {
-        const skin = playerNFTState.ownedSkins.find(s => s.id === skinId);
-        if (skin) {
-            playerNFTState.activeSkin = skinId;
-            document.getElementById('mainFishImg').src = skin.image;
-            saveNFTState();
-        }
-    }
-}; 
+} 

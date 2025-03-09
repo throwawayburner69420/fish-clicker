@@ -1,171 +1,220 @@
 // Sound System
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let isSoundMuted = false;
+let audioContext = null;
 
-// Create oscillator-based sounds
-function createSound(type, frequency, duration, volume = 0.05) {
-    if (isSoundMuted) return;
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-    
-    // Softer volume and smoother envelope
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + duration);
+// Initialize audio
+function initAudio() {
+    console.log('Initializing audio system...');
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (error) {
+        console.error('Web Audio API not supported:', error);
+    }
 }
 
-// Create bubble sound
+// Function to create a bubble pop sound
 function createBubbleSound() {
-    if (isSoundMuted) return;
+    if (!audioContext || isSoundMuted) return;
 
-    // Create multiple oscillators for a richer sound
-    const mainOsc = audioContext.createOscillator();
-    const subOsc = audioContext.createOscillator();
-    const noiseOsc = audioContext.createOscillator();
-    
-    const mainGain = audioContext.createGain();
-    const subGain = audioContext.createGain();
-    const noiseGain = audioContext.createGain();
-    
-    // Create filters for shaping the sound
-    const mainFilter = audioContext.createBiquadFilter();
-    const subFilter = audioContext.createBiquadFilter();
-    const noiseFilter = audioContext.createBiquadFilter();
+    try {
+        // Create oscillator and gain nodes
+        const osc = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const filterNode = audioContext.createBiquadFilter();
 
-    // Randomize the base frequency for variation
-    const baseFreq = 400 + Math.random() * 200;
-    
-    // Main bubble resonance
-    mainFilter.type = 'bandpass';
-    mainFilter.frequency.setValueAtTime(baseFreq * 2, audioContext.currentTime);
-    mainFilter.Q.value = 8;
-    
-    // Sub-frequency for depth
-    subFilter.type = 'bandpass';
-    subFilter.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
-    subFilter.Q.value = 4;
-    
-    // Noise filter for water texture
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(baseFreq * 3, audioContext.currentTime);
-    noiseFilter.Q.value = 2;
+        // Connect the nodes
+        osc.connect(filterNode);
+        filterNode.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-    // Configure oscillators
-    mainOsc.type = 'sine';
-    mainOsc.frequency.setValueAtTime(baseFreq * 2, audioContext.currentTime);
-    mainOsc.frequency.exponentialRampToValueAtTime(baseFreq, audioContext.currentTime + 0.1);
+        // Set up the oscillator
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1);
 
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
-    subOsc.frequency.exponentialRampToValueAtTime(baseFreq * 0.5, audioContext.currentTime + 0.15);
+        // Set up the filter
+        filterNode.type = 'lowpass';
+        filterNode.frequency.setValueAtTime(1500, audioContext.currentTime);
+        filterNode.Q.setValueAtTime(10, audioContext.currentTime);
 
-    noiseOsc.type = 'sawtooth';
-    noiseOsc.frequency.setValueAtTime(baseFreq * 3, audioContext.currentTime);
+        // Set up the gain envelope
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.1);
 
-    // Set up gain envelopes
-    mainGain.gain.setValueAtTime(0, audioContext.currentTime);
-    mainGain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02);
-    mainGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+        // Start and stop
+        osc.start(audioContext.currentTime);
+        osc.stop(audioContext.currentTime + 0.1);
 
-    subGain.gain.setValueAtTime(0, audioContext.currentTime);
-    subGain.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
-    subGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
-
-    noiseGain.gain.setValueAtTime(0, audioContext.currentTime);
-    noiseGain.gain.linearRampToValueAtTime(0.05, audioContext.currentTime);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
-
-    // Connect nodes
-    mainOsc.connect(mainFilter);
-    mainFilter.connect(mainGain);
-    mainGain.connect(audioContext.destination);
-
-    subOsc.connect(subFilter);
-    subFilter.connect(subGain);
-    subGain.connect(audioContext.destination);
-
-    noiseOsc.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(audioContext.destination);
-
-    // Start and stop all oscillators
-    const startTime = audioContext.currentTime;
-    const duration = 0.2 + Math.random() * 0.1;
-    
-    mainOsc.start(startTime);
-    subOsc.start(startTime);
-    noiseOsc.start(startTime);
-    
-    mainOsc.stop(startTime + duration);
-    subOsc.stop(startTime + duration);
-    noiseOsc.stop(startTime + duration);
-
-    // Add a small chance of a secondary bubble sound
-    if (Math.random() < 0.3) {
-        setTimeout(() => {
-            const smallerDuration = 0.1;
-            const smallOsc = audioContext.createOscillator();
-            const smallGain = audioContext.createGain();
-            const smallFilter = audioContext.createBiquadFilter();
-
-            smallFilter.type = 'bandpass';
-            smallFilter.frequency.setValueAtTime(baseFreq * 1.5, audioContext.currentTime);
-            smallFilter.Q.value = 6;
-
-            smallOsc.type = 'sine';
-            smallOsc.frequency.setValueAtTime(baseFreq * 1.5, audioContext.currentTime);
-            smallOsc.frequency.exponentialRampToValueAtTime(baseFreq * 0.75, audioContext.currentTime + smallerDuration);
-
-            smallGain.gain.setValueAtTime(0, audioContext.currentTime);
-            smallGain.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
-            smallGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + smallerDuration);
-
-            smallOsc.connect(smallFilter);
-            smallFilter.connect(smallGain);
-            smallGain.connect(audioContext.destination);
-
-            smallOsc.start(audioContext.currentTime);
-            smallOsc.stop(audioContext.currentTime + smallerDuration);
-        }, Math.random() * 100);
+    } catch (error) {
+        console.error('Error creating bubble sound:', error);
     }
 }
 
 // Function to play sound
 function playSound(soundName) {
+    if (isSoundMuted) return;
+    
     switch(soundName) {
         case 'click':
-            // Bubble pop sound
             createBubbleSound();
             break;
         case 'purchase':
-            // Happy purchase sound
-            setTimeout(() => createSound('sine', 600, 0.1, 0.02), 0);
-            setTimeout(() => createSound('sine', 800, 0.1, 0.02), 50);
+            // Play two bubble sounds in quick succession
+            createBubbleSound();
+            setTimeout(() => createBubbleSound(), 50);
             break;
         case 'achievement':
-            // Gentle achievement melody
-            setTimeout(() => createSound('sine', 600, 0.1, 0.02), 0);
-            setTimeout(() => createSound('sine', 700, 0.1, 0.02), 100);
-            setTimeout(() => createSound('sine', 900, 0.15, 0.02), 200);
+            // Play three bubble sounds
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => createBubbleSound(), i * 100);
+            }
             break;
         case 'prestige':
-            // Soft prestige melody
-            setTimeout(() => createSound('sine', 500, 0.15, 0.02), 0);
-            setTimeout(() => createSound('sine', 600, 0.15, 0.02), 150);
-            setTimeout(() => createSound('sine', 700, 0.15, 0.02), 300);
-            setTimeout(() => createSound('sine', 900, 0.2, 0.02), 450);
+            // Play five bubble sounds
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => createBubbleSound(), i * 150);
+            }
             break;
     }
+}
+
+// Event listeners
+function setupEventListeners() {
+    // Main fish click
+    document.getElementById('mainFish').addEventListener('click', handleFishClick);
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+
+    // Prestige button
+    document.getElementById('prestigeButton').addEventListener('click', prestige);
+
+    // Add sound toggle listener
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.addEventListener('click', () => {
+            isSoundMuted = !isSoundMuted;
+            soundToggle.textContent = isSoundMuted ? '🔇' : '🔊';
+            soundToggle.classList.toggle('muted', isSoundMuted);
+            
+            // Resume audio context if unmuting
+            if (!isSoundMuted && audioContext?.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    }
+
+    // Wallet connect button
+    const connectButton = document.getElementById('abstractWalletConnect');
+    if (connectButton) {
+        // Ensure button has proper structure
+        if (!connectButton.querySelector('.wallet-btn-text')) {
+            connectButton.innerHTML = `
+                <span class="wallet-btn-text">Connect Wallet</span>
+                <span class="wallet-btn-loading" style="display: none;">Connecting...</span>
+            `;
+        }
+
+        // Force enable the button
+        connectButton.removeAttribute('disabled');
+        connectButton.style.pointerEvents = 'auto';
+        connectButton.style.cursor = 'pointer';
+
+        connectButton.addEventListener('click', async () => {
+            console.log('Wallet button clicked'); // Debug log
+            try {
+                const btnText = connectButton.querySelector('.wallet-btn-text');
+                const btnLoading = connectButton.querySelector('.wallet-btn-loading');
+                
+                // Show loading state
+                connectButton.classList.add('loading');
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'block';
+                
+                // Check if already connected - if so, disconnect
+                if (window.privyWalletManager?.isConnected()) {
+                    console.log('Attempting to disconnect wallet'); // Debug log
+                    try {
+                        await window.privyWalletManager.disconnect();
+                        btnText.textContent = 'Connect Wallet';
+                        connectButton.classList.remove('connected');
+                        localStorage.removeItem('abstractWalletConnected');
+                        console.log('Wallet disconnected successfully'); // Debug log
+                    } catch (disconnectError) {
+                        console.error('Error disconnecting wallet:', disconnectError);
+                        showError('Failed to disconnect wallet. Please try again.');
+                    }
+                    return;
+                }
+
+                // Connect using Privy to manage Abstract wallet
+                if (!window.privyWalletManager) {
+                    throw new Error('Privy wallet manager not initialized');
+                }
+
+                console.log('Attempting to connect wallet'); // Debug log
+                await window.privyWalletManager.connect();
+                
+                // Update button text to show connected state
+                const address = await window.privyWalletManager.getAddress();
+                if (address) {
+                    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                    btnText.textContent = shortAddress;
+                    connectButton.classList.add('connected');
+                    localStorage.setItem('abstractWalletConnected', 'true');
+                    console.log('Wallet connected successfully:', shortAddress); // Debug log
+                }
+
+            } catch (error) {
+                console.error('Error managing wallet connection:', error);
+                showError('Failed to manage wallet connection. Please try again.');
+                const btnText = connectButton.querySelector('.wallet-btn-text');
+                btnText.textContent = 'Connect Wallet';
+                connectButton.classList.remove('connected');
+            } finally {
+                // Remove loading state
+                const btnText = connectButton.querySelector('.wallet-btn-text');
+                const btnLoading = connectButton.querySelector('.wallet-btn-loading');
+                connectButton.classList.remove('loading');
+                btnText.style.display = 'block';
+                btnLoading.style.display = 'none';
+                
+                // Ensure button remains clickable
+                connectButton.removeAttribute('disabled');
+                connectButton.style.pointerEvents = 'auto';
+                connectButton.style.cursor = 'pointer';
+            }
+        });
+
+        // Check initial connection state
+        if (window.privyWalletManager?.isConnected()) {
+            window.privyWalletManager.getAddress().then(address => {
+                if (address) {
+                    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                    const btnText = connectButton.querySelector('.wallet-btn-text');
+                    btnText.textContent = shortAddress;
+                    connectButton.classList.add('connected');
+                    // Ensure button remains clickable
+                    connectButton.removeAttribute('disabled');
+                    connectButton.style.pointerEvents = 'auto';
+                    connectButton.style.cursor = 'pointer';
+                }
+            }).catch(console.error);
+        }
+    }
+
+    // Register click as activity for NFT drops
+    document.addEventListener('click', () => {
+        if (window.NFT_SYSTEM?.state) {
+            window.NFT_SYSTEM.state.lastActiveCheck = Date.now();
+        }
+    });
 }
 
 // Game state
@@ -177,7 +226,8 @@ let gameState = {
     prestigeMultiplier: 1,
     lastSave: Date.now(),
     upgrades: [],
-    achievements: []
+    achievements: [],
+    clickCount: 0 // Add click counter to game state
 };
 
 // Upgrade types
@@ -237,44 +287,30 @@ function initGame() {
     startGameLoop();
     window.NFT_SYSTEM.init(); // Initialize NFT system
     updateNFTDisplay();
-}
-
-// Event listeners
-function setupEventListeners() {
-    // Main fish click
-    document.getElementById('mainFish').addEventListener('click', handleFishClick);
-
-    // Tab switching - Fix the event listeners
-    document.querySelectorAll('.tab-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const tabId = button.getAttribute('data-tab');
-            console.log('Switching to tab:', tabId); // Debug log
-            switchTab(tabId);
-        });
-    });
-
-    // Prestige button
-    document.getElementById('prestigeButton').addEventListener('click', prestige);
-
-    // Add sound toggle listener
-    const soundToggle = document.getElementById('soundToggle');
-    soundToggle.addEventListener('click', () => {
-        isSoundMuted = !isSoundMuted;
-        soundToggle.textContent = isSoundMuted ? '🔇' : '🔊';
-        soundToggle.classList.toggle('muted', isSoundMuted);
-        playSound('click');
-    });
-
-    // Register click as activity for NFT drops
-    document.addEventListener('click', () => {
-        window.NFT_SYSTEM.state.lastActiveCheck = Date.now();
-    });
+    
+    // Add click counter to the fish
+    const mainFish = document.getElementById('mainFish');
+    if (mainFish) {
+        const counter = document.createElement('div');
+        counter.id = 'clickCounter';
+        counter.className = 'click-counter';
+        counter.textContent = gameState.clickCount.toLocaleString();
+        mainFish.appendChild(counter);
+    }
 }
 
 // Handle fish click
 function handleFishClick() {
     const clickValue = gameState.clickValue * gameState.prestigeMultiplier;
     gameState.bubbles += clickValue;
+    gameState.clickCount++; // Increment click counter
+    
+    // Update click counter display
+    const counter = document.getElementById('clickCounter');
+    if (counter) {
+        counter.textContent = gameState.clickCount.toLocaleString();
+    }
+    
     createBubbleParticle();
     playSound('click');
     updateDisplay();
@@ -366,9 +402,18 @@ function saveGame() {
 function loadGame() {
     const savedGame = localStorage.getItem('fishClickerSave');
     if (savedGame) {
-        gameState = JSON.parse(savedGame);
+        const loadedState = JSON.parse(savedGame);
+        // Ensure clickCount is initialized even if loading old save
+        loadedState.clickCount = loadedState.clickCount || 0;
+        gameState = loadedState;
     }
     updateDisplay();
+    
+    // Update click counter if it exists
+    const counter = document.getElementById('clickCounter');
+    if (counter) {
+        counter.textContent = gameState.clickCount.toLocaleString();
+    }
 }
 
 // Achievement system
@@ -468,7 +513,6 @@ function updateNFTDisplay() {
                     <img src="${skin.image}" alt="${skin.name}">
                     <h3>${skin.name}</h3>
                     <p class="rarity ${skin.rarity}">${skin.rarity.toUpperCase()}</p>
-                    <p>Boost: +${(skin.boostMultiplier - 1) * 100}%</p>
                 `;
                 
                 card.addEventListener('click', () => equipSkin(skin.id));
@@ -476,10 +520,9 @@ function updateNFTDisplay() {
             });
         }
         
-        // Update weekly shop
+        // Update weekly shop - only update if empty
         const weeklyShop = document.getElementById('weeklyShop');
-        if (!weeklyShop) return;
-        weeklyShop.innerHTML = '';
+        if (!weeklyShop || weeklyShop.children.length > 0) return;
         
         if (window.NFT_SYSTEM && window.NFT_SYSTEM.shop) {
             const currentRotation = window.NFT_SYSTEM.shop.getCurrentRotation();
@@ -502,11 +545,8 @@ function updateNFTDisplay() {
                         <h3>${skin.name}</h3>
                         <p class="rarity ${skin.rarity}">${skin.rarity.toUpperCase()}</p>
                         <p>${skin.description}</p>
-                        <p>Boost: +${(skin.boostMultiplier - 1) * 100}%</p>
-                        <button onclick="purchaseNFTSkin('${skinId}')" 
-                                ${window.NFT_SYSTEM.state.weeklyPurchases >= window.NFT_SYSTEM.config.LIMITS.WEEKLY_PURCHASES ? 'disabled' : ''}>
-                            Purchase
-                        </button>
+                        <div class="nft-price">1 USDC</div>
+                        <button class="mint-button" onclick="nftSystem.mintSkin('${skinId}')">Mint NFT</button>
                     `;
                     
                     weeklyShop.appendChild(card);
@@ -542,38 +582,23 @@ function equipSkin(skinId) {
     }
 }
 
-// Purchase NFT skin from weekly shop
-function purchaseNFTSkin(skinId) {
-    try {
-        // Find the skin in the NFT_SYSTEM.skins catalog
-        let skin = null;
-        let skinRarity = null;
-        
-        for (const rarity in window.NFT_SYSTEM.skins) {
-            if (window.NFT_SYSTEM.skins[rarity][skinId]) {
-                skin = window.NFT_SYSTEM.skins[rarity][skinId];
-                skinRarity = rarity;
-                break;
-            }
-        }
-        
-        if (skin && window.NFT_SYSTEM.state.weeklyPurchases < window.NFT_SYSTEM.config.LIMITS.WEEKLY_PURCHASES) {
-            // This would normally involve blockchain transaction
-            window.NFT_SYSTEM.state.weeklyPurchases++;
-            window.NFT_SYSTEM.state.ownedSkins.push({
-                id: `${skin.id}_${Date.now()}`,
-                ...skin,
-                mintDate: new Date().toISOString()
-            });
-            
-            playSound('purchase');
-            updateDisplay();
-            window.NFT_SYSTEM.saveNFTState();
-        }
-    } catch (error) {
-        console.error('Error purchasing NFT skin:', error);
-    }
+// Helper function to show errors
+function showError(message) {
+    const popup = document.createElement('div');
+    popup.className = 'achievement-popup';
+    popup.innerHTML = `
+        <div class="achievement-content">
+            <h3>Error</h3>
+            <p>${message}</p>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 3000);
 }
 
-// Initialize game when DOM is loaded
-document.addEventListener('DOMContentLoaded', initGame); 
+// Update the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Game initializing...');
+    initAudio(); // Initialize audio system first
+    initGame();
+}); 

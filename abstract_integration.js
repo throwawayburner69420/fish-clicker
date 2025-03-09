@@ -5,16 +5,46 @@ const ABSTRACT_CONFIG = {
     NETWORK_ID: 1, // Replace with actual Abstract network ID
 };
 
+// Check if Abstract SDK is loaded
+if (!window.AbstractWallet) {
+    console.error('Abstract SDK not found! Make sure the SDK is properly loaded.');
+}
+
 // Wallet Connection
 let abstractWallet = null;
 let userAddress = null;
 
 async function connectAbstractWallet() {
     try {
-        // Initialize Abstract Global Wallet
-        const wallet = await window.AbstractWallet.connect();
+        console.log('Attempting to connect Abstract wallet...');
+        
+        // Check if SDK is loaded
+        if (!window.AbstractWallet) {
+            throw new Error('Abstract SDK not initialized. Please check your internet connection and try again.');
+        }
+
+        // Initialize Abstract Global Wallet with configuration
+        const wallet = await window.AbstractWallet.connect({
+            network: ABSTRACT_CONFIG.NETWORK_ID,
+            onConnect: () => {
+                console.log('Wallet connected successfully!');
+                updateWalletUI();
+            },
+            onDisconnect: () => {
+                console.log('Wallet disconnected');
+                abstractWallet = null;
+                userAddress = null;
+                updateWalletUI();
+            },
+            onError: (error) => {
+                console.error('Wallet connection error:', error);
+            }
+        });
+
         abstractWallet = wallet;
         userAddress = await wallet.getAddress();
+        
+        console.log('Wallet connected:', userAddress);
         
         // Update UI to show connected state
         updateWalletUI();
@@ -25,8 +55,23 @@ async function connectAbstractWallet() {
         return true;
     } catch (error) {
         console.error('Failed to connect Abstract wallet:', error);
+        showError('Failed to connect wallet: ' + error.message);
         return false;
     }
+}
+
+// Show error message to user
+function showError(message) {
+    const popup = document.createElement('div');
+    popup.className = 'nft-drop-popup';
+    popup.innerHTML = `
+        <div class="nft-drop-content">
+            <h2>Error</h2>
+            <p>${message}</p>
+            <button onclick="this.parentElement.parentElement.remove()">OK</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
 }
 
 // NFT Contract Integration
@@ -176,4 +221,13 @@ window.ABSTRACT_INTEGRATION = {
     purchaseNFT: purchaseNFT,
     isConnected: () => !!userAddress,
     getUserAddress: () => userAddress
-}; 
+};
+
+// Initialize Abstract integration when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Initializing Abstract integration...');
+    if (localStorage.getItem('abstractWalletConnected') === 'true') {
+        console.log('Attempting to reconnect previous wallet session...');
+        connectAbstractWallet();
+    }
+}); 
