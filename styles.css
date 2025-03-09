@@ -582,10 +582,31 @@ body {
     }
 }
 
-/* Responsive Design */
+/* Mobile Optimizations */
 @media (max-width: 768px) {
     .game-container {
-        padding: 10px;
+        padding: 5px;
+        gap: 5px;
+    }
+
+    .currency-container {
+        padding: 5px 10px;
+        height: auto;
+        min-height: 40px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .currency {
+        font-size: 14px;
+        margin-right: 10px;
+        white-space: nowrap;
+    }
+
+    .wallet-btn {
+        font-size: 11px;
+        padding: 4px 8px;
+        min-width: 80px;
     }
 
     .main-fish img {
@@ -593,8 +614,120 @@ body {
         height: 150px;
     }
 
+    .shop-container {
+        height: 300px;
+        padding: 8px;
+    }
+
+    .tab-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        touch-action: manipulation;
+    }
+
     .shop-items {
         grid-template-columns: 1fr;
+    }
+
+    .nft-inventory-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .weekly-shop-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .shop-item {
+        height: auto;
+        min-height: 150px;
+    }
+
+    .nft-skin-card {
+        height: auto;
+        min-height: 100px;
+    }
+
+    .shop-nft-card {
+        height: auto;
+        min-height: 180px;
+    }
+
+    h2 {
+        font-size: 14px;
+    }
+
+    h3 {
+        font-size: 12px;
+    }
+
+    .click-counter {
+        font-size: 18px;
+        padding: 6px 12px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+    .currency-container {
+        justify-content: space-between;
+    }
+
+    .currency {
+        font-size: 12px;
+        margin-right: 5px;
+    }
+
+    .wallet-btn {
+        font-size: 10px;
+        padding: 3px 6px;
+        min-width: 70px;
+    }
+
+    .main-fish img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .shop-container {
+        height: 280px;
+    }
+
+    .tab-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+
+/* Handle notched phones */
+@supports (padding: max(0px)) {
+    .game-container {
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+}
+
+/* Touch optimizations */
+button, 
+.shop-item,
+.nft-skin-card,
+.shop-nft-card {
+    min-height: 44px; /* Minimum touch target size */
+    touch-action: manipulation;
+}
+
+.tab-content,
+.shop-items,
+.nft-inventory-grid,
+.weekly-shop-grid {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Fix viewport height issues on mobile */
+@supports (-webkit-touch-callout: none) {
+    .game-container {
+        height: -webkit-fill-available;
     }
 }
 
@@ -678,19 +811,6 @@ body {
 .listed-nft-card .cancel-listing {
     padding: 4px 8px;
     font-size: 11px;
-}
-
-/* Make headings smaller */
-h2 {
-    font-size: 16px;
-    margin: 0 0 8px 0;
-    color: #fff;
-}
-
-h3 {
-    font-size: 14px;
-    margin: 0 0 8px 0;
-    color: rgba(255, 255, 255, 0.9);
 }
 
 /* Weekly Shop */
