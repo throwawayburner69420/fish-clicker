@@ -288,27 +288,17 @@ function initGame() {
     window.NFT_SYSTEM.init(); // Initialize NFT system
     updateNFTDisplay();
     
-    // Create and add click counter to the game area
-    const gameArea = document.querySelector('.game-area');
-    if (gameArea) {
-        // Remove existing counter if it exists
-        const existingCounter = document.getElementById('clickCounter');
-        if (existingCounter) {
-            existingCounter.remove();
-        }
-        
-        // Create new counter
-        const counter = document.createElement('div');
-        counter.id = 'clickCounter';
-        counter.className = 'click-counter';
-        counter.textContent = `Clicks: ${gameState.clickCount.toLocaleString()}`;
-        gameArea.appendChild(counter);
-        
-        // Force a reflow to ensure the counter is visible
-        counter.style.opacity = '0';
-        counter.offsetHeight; // Force reflow
-        counter.style.opacity = '1';
+    // Create and add click counter to the body
+    const existingCounter = document.getElementById('clickCounter');
+    if (existingCounter) {
+        existingCounter.remove();
     }
+    
+    const counter = document.createElement('div');
+    counter.id = 'clickCounter';
+    counter.className = 'click-counter';
+    counter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
+    document.body.appendChild(counter);
 }
 
 // Handle fish click
@@ -320,7 +310,7 @@ function handleFishClick() {
     // Update click counter display
     const counter = document.getElementById('clickCounter');
     if (counter) {
-        counter.textContent = `Clicks: ${gameState.clickCount.toLocaleString()}`;
+        counter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
     }
     
     createBubbleParticle();
@@ -424,7 +414,7 @@ function loadGame() {
     // Update click counter if it exists
     const counter = document.getElementById('clickCounter');
     if (counter) {
-        counter.textContent = gameState.clickCount.toLocaleString();
+        counter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
     }
 }
 

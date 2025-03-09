@@ -158,26 +158,27 @@ body {
 }
 
 .click-counter {
-    position: absolute;
-    top: 20%;
+    position: fixed;
+    top: 100px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 24px;
+    font-size: 28px;
     color: white;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px 20px;
-    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 12px 24px;
+    border-radius: 15px;
     backdrop-filter: blur(5px);
     z-index: 1000;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    min-width: 120px;
+    min-width: 140px;
     justify-content: center;
-    transition: opacity 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    pointer-events: none;
 }
 
 .main-fish img {
@@ -668,8 +669,9 @@ body {
     }
 
     .click-counter {
-        font-size: 18px;
-        padding: 6px 12px;
+        top: 80px;
+        font-size: 24px;
+        padding: 10px 20px;
     }
 }
 
@@ -702,6 +704,12 @@ body {
     .tab-btn {
         padding: 4px 8px;
         font-size: 11px;
+    }
+
+    .click-counter {
+        top: 60px;
+        font-size: 20px;
+        padding: 8px 16px;
     }
 }
 
