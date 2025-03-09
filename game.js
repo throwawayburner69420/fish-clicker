@@ -288,15 +288,13 @@ function initGame() {
     window.NFT_SYSTEM.init(); // Initialize NFT system
     updateNFTDisplay();
     
-    // Add click counter to the fish
-    const mainFish = document.getElementById('mainFish');
-    if (mainFish) {
-        const counter = document.createElement('div');
-        counter.id = 'clickCounter';
-        counter.className = 'click-counter';
-        counter.textContent = gameState.clickCount.toLocaleString();
-        mainFish.appendChild(counter);
-    }
+    // Create and add click counter to the game area
+    const gameArea = document.querySelector('.game-area');
+    const counter = document.createElement('div');
+    counter.id = 'clickCounter';
+    counter.className = 'click-counter';
+    counter.textContent = gameState.clickCount.toLocaleString();
+    gameArea.appendChild(counter);
 }
 
 // Handle fish click

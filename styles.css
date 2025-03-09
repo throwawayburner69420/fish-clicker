@@ -159,24 +159,22 @@ body {
 
 .click-counter {
     position: absolute;
-    top: -60px;
+    top: 30%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 16px;
+    font-size: 24px;
     color: white;
     background: rgba(0, 0, 0, 0.3);
     padding: 8px 15px;
     border-radius: 8px;
     backdrop-filter: blur(5px);
     z-index: 10;
-}
-
-.click-counter::after {
-    content: '👆';
-    font-size: 16px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    min-width: 80px;
+    justify-content: center;
 }
 
 .main-fish img {
