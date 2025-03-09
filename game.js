@@ -82,7 +82,10 @@ function playSound(soundName) {
 // Event listeners
 function setupEventListeners() {
     // Main fish click
-    document.getElementById('mainFish').addEventListener('click', handleFishClick);
+    const mainFish = document.getElementById('mainFish');
+    if (mainFish) {
+        mainFish.addEventListener('click', handleFishClick);
+    }
 
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(button => {
@@ -93,7 +96,10 @@ function setupEventListeners() {
     });
 
     // Prestige button
-    document.getElementById('prestigeButton').addEventListener('click', prestige);
+    const prestigeButton = document.getElementById('prestigeButton');
+    if (prestigeButton) {
+        prestigeButton.addEventListener('click', prestige);
+    }
 
     // Add sound toggle listener
     const soundToggle = document.getElementById('soundToggle');
@@ -103,14 +109,13 @@ function setupEventListeners() {
             soundToggle.textContent = isSoundMuted ? '🔇' : '🔊';
             soundToggle.classList.toggle('muted', isSoundMuted);
             
-            // Resume audio context if unmuting
             if (!isSoundMuted && audioContext?.state === 'suspended') {
                 audioContext.resume();
             }
         });
     }
 
-    // Wallet connect button
+    // Wallet connect button - make it more defensive
     const connectButton = document.getElementById('abstractWalletConnect');
     if (connectButton) {
         // Ensure button has proper structure
@@ -121,21 +126,16 @@ function setupEventListeners() {
             `;
         }
 
-        // Force enable the button
-        connectButton.removeAttribute('disabled');
-        connectButton.style.pointerEvents = 'auto';
-        connectButton.style.cursor = 'pointer';
-
         connectButton.addEventListener('click', async () => {
-            console.log('Wallet button clicked'); // Debug log
+            console.log('Wallet button clicked');
             try {
                 const btnText = connectButton.querySelector('.wallet-btn-text');
                 const btnLoading = connectButton.querySelector('.wallet-btn-loading');
                 
-                // Show loading state
-                connectButton.classList.add('loading');
-                btnText.style.display = 'none';
-                btnLoading.style.display = 'block';
+                if (!window.privyWalletManager) {
+                    console.log('Privy wallet manager not initialized, skipping wallet connection');
+                    return;
+                }
                 
                 // Check if already connected - if so, disconnect
                 if (window.privyWalletManager?.isConnected()) {
@@ -154,10 +154,6 @@ function setupEventListeners() {
                 }
 
                 // Connect using Privy to manage Abstract wallet
-                if (!window.privyWalletManager) {
-                    throw new Error('Privy wallet manager not initialized');
-                }
-
                 console.log('Attempting to connect wallet'); // Debug log
                 await window.privyWalletManager.connect();
                 
@@ -209,7 +205,7 @@ function setupEventListeners() {
         }
     }
 
-    // Register click as activity for NFT drops
+    // Register click as activity for NFT drops - make it defensive
     document.addEventListener('click', () => {
         if (window.NFT_SYSTEM?.state) {
             window.NFT_SYSTEM.state.lastActiveCheck = Date.now();
@@ -227,7 +223,7 @@ let gameState = {
     lastSave: Date.now(),
     upgrades: [],
     achievements: [],
-    clickCount: 0 // Add click counter to game state
+    clickCount: 0
 };
 
 // Upgrade types
@@ -282,41 +278,54 @@ const ACHIEVEMENTS = {
 
 // Initialize game
 function initGame() {
+    console.log('Initializing game...');
+    
+    // Initialize click counter
+    const clickCounter = document.createElement('div');
+    clickCounter.id = 'clickCounter';
+    clickCounter.textContent = '0 Clicks';
+    document.body.appendChild(clickCounter);
+    
     loadGame();
     setupEventListeners();
     startGameLoop();
-    window.NFT_SYSTEM.init(); // Initialize NFT system
-    updateNFTDisplay();
     
-    // Create and add click counter to the body
-    const existingCounter = document.getElementById('clickCounter');
-    if (existingCounter) {
-        existingCounter.remove();
+    // Initialize NFT system if available
+    if (window.NFT_SYSTEM) {
+        try {
+            window.NFT_SYSTEM.init();
+            updateNFTDisplay();
+        } catch (error) {
+            console.error('Error initializing NFT system:', error);
+        }
     }
     
-    const counter = document.createElement('div');
-    counter.id = 'clickCounter';
-    counter.className = 'click-counter';
-    counter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
-    document.body.appendChild(counter);
+    updateDisplay();
 }
 
 // Handle fish click
 function handleFishClick() {
+    console.log('Fish clicked!');
+    
+    // Update game state
     const clickValue = gameState.clickValue * gameState.prestigeMultiplier;
     gameState.bubbles += clickValue;
-    gameState.clickCount++; // Increment click counter
+    gameState.clickCount++;
     
-    // Update click counter display
-    const counter = document.getElementById('clickCounter');
-    if (counter) {
-        counter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
+    // Update click counter
+    const clickCounter = document.getElementById('clickCounter');
+    if (clickCounter) {
+        clickCounter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
     }
     
+    // Visual and sound effects
     createBubbleParticle();
     playSound('click');
+    
+    // Update display and save
     updateDisplay();
     checkAchievements();
+    saveGame();
 }
 
 // Create bubble particle effect
@@ -405,17 +414,16 @@ function loadGame() {
     const savedGame = localStorage.getItem('fishClickerSave');
     if (savedGame) {
         const loadedState = JSON.parse(savedGame);
-        // Ensure clickCount is initialized even if loading old save
         loadedState.clickCount = loadedState.clickCount || 0;
         gameState = loadedState;
+        
+        // Update click counter with loaded value
+        const clickCounter = document.getElementById('clickCounter');
+        if (clickCounter) {
+            clickCounter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
+        }
     }
     updateDisplay();
-    
-    // Update click counter if it exists
-    const counter = document.getElementById('clickCounter');
-    if (counter) {
-        counter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
-    }
 }
 
 // Achievement system
@@ -600,7 +608,12 @@ function showError(message) {
 
 // Update the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Game initializing...');
+    console.log('DOM Content Loaded...');
     initAudio(); // Initialize audio system first
-    initGame();
+    
+    // Small delay to ensure DOM is fully ready
+    setTimeout(() => {
+        console.log('Starting game initialization...');
+        initGame();
+    }, 100);
 }); 
