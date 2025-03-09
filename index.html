@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fish Clicker 🐠</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Currency Display -->
+        <div class="currency-container">
+            <div class="currency">
+                <span id="bubbles">0</span> 🫧
+            </div>
+            <div class="currency">
+                <span id="pearls">0</span> 💎
+            </div>
+            <button id="soundToggle" class="sound-toggle">🔊</button>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="game-area">
+            <!-- Main Clickable Fish -->
+            <div class="main-fish" id="mainFish">
+                <img src="assets/fish.png" alt="Click me!" id="mainFishImg">
+            </div>
+
+            <!-- Particle Effects Container -->
+            <div id="particles"></div>
+        </div>
+
+        <!-- Shop and Upgrades -->
+        <div class="shop-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="fish">Fish</button>
+                <button class="tab-btn" data-tab="upgrades">Upgrades</button>
+                <button class="tab-btn" data-tab="nft">NFT Skins</button>
+                <button class="tab-btn" data-tab="shop">Weekly Shop</button>
+                <button class="tab-btn" data-tab="prestige">Prestige</button>
+            </div>
+
+            <!-- Fish Shop -->
+            <div class="tab-content active" id="fishShop">
+                <h2>Fish Shop</h2>
+                <div class="shop-items" id="fishItems">
+                    <!-- Fish items will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Upgrades Shop -->
+            <div class="tab-content" id="upgradesShop">
+                <h2>Upgrades</h2>
+                <div class="shop-items" id="upgradeItems">
+                    <!-- Upgrade items will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- NFT Skins Inventory -->
+            <div class="tab-content" id="nftShop">
+                <h2>NFT Fish Skins</h2>
+                <div class="nft-inventory">
+                    <h3>Your Collection</h3>
+                    <div class="nft-inventory-grid" id="nftInventory">
+                        <!-- NFT skin items will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly NFT Shop -->
+            <div class="tab-content" id="shopShop">
+                <h2>Weekly NFT Shop</h2>
+                <div class="weekly-shop">
+                    <h3>This Week's Special Skins</h3>
+                    <div class="weekly-shop-grid" id="weeklyShop">
+                        <!-- Weekly shop items will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prestige Shop -->
+            <div class="tab-content" id="prestigeShop">
+                <h2>Aquarium Prestige</h2>
+                <div class="prestige-info">
+                    <p>Current Level: <span id="prestigeLevel">0</span></p>
+                    <p>Next Level Bonus: <span id="nextPrestigeBonus">+10%</span></p>
+                    <button id="prestigeButton" class="prestige-btn">Prestige</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Popup -->
+    <div id="achievementPopup" class="achievement-popup">
+        <div class="achievement-content">
+            <h3>Achievement Unlocked!</h3>
+            <p id="achievementText"></p>
+        </div>
+    </div>
+
+    <script src="nft_system.js"></script>
+    <script src="game.js"></script>
+</body>
+</html> 

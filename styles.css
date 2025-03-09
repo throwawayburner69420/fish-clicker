@@ -1,0 +1,400 @@
+/* Game Container */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(180deg, #006994 0%, #003366 100%);
+    color: white;
+    min-height: 100vh;
+}
+
+.game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 20px;
+    height: 100vh;
+}
+
+/* Currency Display */
+.currency-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 24px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+}
+
+.currency {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sound-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s;
+    margin-left: 20px;
+}
+
+.sound-toggle:hover {
+    transform: scale(1.1);
+}
+
+.sound-toggle.muted {
+    opacity: 0.5;
+}
+
+/* Game Area */
+.game-area {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.main-fish {
+    cursor: pointer;
+    transition: transform 0.1s;
+    position: relative;
+}
+
+.main-fish img {
+    width: 200px;
+    height: 200px;
+    user-select: none;
+}
+
+.main-fish:active {
+    transform: scale(0.95);
+}
+
+/* Particles */
+#particles {
+    position: absolute;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+}
+
+.particle {
+    position: absolute;
+    pointer-events: none;
+    animation: float 1s ease-out forwards;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Shop Container */
+.shop-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.tab-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Shop Items */
+.shop-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.shop-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.shop-item:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.shop-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Achievement Popup */
+.achievement-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    transform: translateX(120%);
+    transition: transform 0.3s;
+}
+
+.achievement-popup.show {
+    transform: translateX(0);
+}
+
+/* Prestige Button */
+.prestige-btn {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border: none;
+    padding: 15px 30px;
+    color: white;
+    border-radius: 25px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.prestige-btn:hover {
+    transform: scale(1.05);
+}
+
+/* NFT System Styles */
+.nft-drop-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    z-index: 1000;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.nft-drop-content {
+    max-width: 400px;
+    padding: 20px;
+}
+
+.nft-drop-content img {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    margin: 10px 0;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.nft-drop-content h2 {
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.nft-drop-content h3 {
+    color: #fff;
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+.nft-drop-content p {
+    color: #ccc;
+    margin: 10px 0;
+}
+
+.nft-drop-content .rarity {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.nft-drop-content .rarity.common {
+    background: #4a4a4a;
+    color: #fff;
+}
+
+.nft-drop-content .rarity.rare {
+    background: #0066cc;
+    color: #fff;
+}
+
+.nft-drop-content .rarity.legendary {
+    background: linear-gradient(45deg, #ffd700, #ff8c00);
+    color: #fff;
+}
+
+.nft-drop-content button {
+    background: linear-gradient(45deg, #2196F3, #00BCD4);
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    font-size: 16px;
+    transition: transform 0.2s;
+}
+
+.nft-drop-content button:hover {
+    transform: scale(1.05);
+}
+
+/* NFT Inventory Styles */
+.nft-inventory {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.nft-inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.nft-skin-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.nft-skin-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nft-skin-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.nft-skin-card.active {
+    border: 2px solid #4CAF50;
+}
+
+/* Weekly Shop Styles */
+.weekly-shop {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.weekly-shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.shop-nft-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.shop-nft-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.shop-nft-card button {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+    font-size: 16px;
+    transition: transform 0.2s;
+}
+
+.shop-nft-card button:hover {
+    transform: scale(1.05);
+}
+
+.shop-nft-card button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .game-container {
+        padding: 10px;
+    }
+
+    .main-fish img {
+        width: 150px;
+        height: 150px;
+    }
+
+    .shop-items {
+        grid-template-columns: 1fr;
+    }
+} 
