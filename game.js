@@ -79,140 +79,6 @@ function playSound(soundName) {
     }
 }
 
-// Event listeners
-function setupEventListeners() {
-    // Main fish click
-    const mainFish = document.getElementById('mainFish');
-    if (mainFish) {
-        mainFish.addEventListener('click', handleFishClick);
-    }
-
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const tabId = button.getAttribute('data-tab');
-            switchTab(tabId);
-        });
-    });
-
-    // Prestige button
-    const prestigeButton = document.getElementById('prestigeButton');
-    if (prestigeButton) {
-        prestigeButton.addEventListener('click', prestige);
-    }
-
-    // Add sound toggle listener
-    const soundToggle = document.getElementById('soundToggle');
-    if (soundToggle) {
-        soundToggle.addEventListener('click', () => {
-            isSoundMuted = !isSoundMuted;
-            soundToggle.textContent = isSoundMuted ? '🔇' : '🔊';
-            soundToggle.classList.toggle('muted', isSoundMuted);
-            
-            if (!isSoundMuted && audioContext?.state === 'suspended') {
-                audioContext.resume();
-            }
-        });
-    }
-
-    // Wallet connect button - make it more defensive
-    const connectButton = document.getElementById('abstractWalletConnect');
-    if (connectButton) {
-        // Ensure button has proper structure
-        if (!connectButton.querySelector('.wallet-btn-text')) {
-            connectButton.innerHTML = `
-                <span class="wallet-btn-text">Connect Wallet</span>
-                <span class="wallet-btn-loading" style="display: none;">Connecting...</span>
-            `;
-        }
-
-        connectButton.addEventListener('click', async () => {
-            console.log('Wallet button clicked');
-            try {
-                const btnText = connectButton.querySelector('.wallet-btn-text');
-                const btnLoading = connectButton.querySelector('.wallet-btn-loading');
-                
-                if (!window.privyWalletManager) {
-                    console.log('Privy wallet manager not initialized, skipping wallet connection');
-                    return;
-                }
-                
-                // Check if already connected - if so, disconnect
-                if (window.privyWalletManager?.isConnected()) {
-                    console.log('Attempting to disconnect wallet'); // Debug log
-                    try {
-                        await window.privyWalletManager.disconnect();
-                        btnText.textContent = 'Connect Wallet';
-                        connectButton.classList.remove('connected');
-                        localStorage.removeItem('abstractWalletConnected');
-                        console.log('Wallet disconnected successfully'); // Debug log
-                    } catch (disconnectError) {
-                        console.error('Error disconnecting wallet:', disconnectError);
-                        showError('Failed to disconnect wallet. Please try again.');
-                    }
-                    return;
-                }
-
-                // Connect using Privy to manage Abstract wallet
-                console.log('Attempting to connect wallet'); // Debug log
-                await window.privyWalletManager.connect();
-                
-                // Update button text to show connected state
-                const address = await window.privyWalletManager.getAddress();
-                if (address) {
-                    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-                    btnText.textContent = shortAddress;
-                    connectButton.classList.add('connected');
-                    localStorage.setItem('abstractWalletConnected', 'true');
-                    console.log('Wallet connected successfully:', shortAddress); // Debug log
-                }
-
-            } catch (error) {
-                console.error('Error managing wallet connection:', error);
-                showError('Failed to manage wallet connection. Please try again.');
-                const btnText = connectButton.querySelector('.wallet-btn-text');
-                btnText.textContent = 'Connect Wallet';
-                connectButton.classList.remove('connected');
-            } finally {
-                // Remove loading state
-                const btnText = connectButton.querySelector('.wallet-btn-text');
-                const btnLoading = connectButton.querySelector('.wallet-btn-loading');
-                connectButton.classList.remove('loading');
-                btnText.style.display = 'block';
-                btnLoading.style.display = 'none';
-                
-                // Ensure button remains clickable
-                connectButton.removeAttribute('disabled');
-                connectButton.style.pointerEvents = 'auto';
-                connectButton.style.cursor = 'pointer';
-            }
-        });
-
-        // Check initial connection state
-        if (window.privyWalletManager?.isConnected()) {
-            window.privyWalletManager.getAddress().then(address => {
-                if (address) {
-                    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-                    const btnText = connectButton.querySelector('.wallet-btn-text');
-                    btnText.textContent = shortAddress;
-                    connectButton.classList.add('connected');
-                    // Ensure button remains clickable
-                    connectButton.removeAttribute('disabled');
-                    connectButton.style.pointerEvents = 'auto';
-                    connectButton.style.cursor = 'pointer';
-                }
-            }).catch(console.error);
-        }
-    }
-
-    // Register click as activity for NFT drops - make it defensive
-    document.addEventListener('click', () => {
-        if (window.NFT_SYSTEM?.state) {
-            window.NFT_SYSTEM.state.lastActiveCheck = Date.now();
-        }
-    });
-}
-
 // Game state
 let gameState = {
     bubbles: 0,
@@ -283,7 +149,7 @@ function initGame() {
     // Initialize click counter
     const clickCounter = document.createElement('div');
     clickCounter.id = 'clickCounter';
-    clickCounter.textContent = '0 Clicks';
+    clickCounter.textContent = '0';
     document.body.appendChild(clickCounter);
     
     loadGame();
@@ -315,7 +181,7 @@ function handleFishClick() {
     // Update click counter
     const clickCounter = document.getElementById('clickCounter');
     if (clickCounter) {
-        clickCounter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
+        clickCounter.textContent = gameState.clickCount.toLocaleString();
     }
     
     // Visual and sound effects
@@ -373,35 +239,12 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     
-    // Fix the tab ID matching
-    const tabContent = document.getElementById(`${tabId}Shop`);
+    const tabContent = document.getElementById(tabId);
     const tabButton = document.querySelector(`[data-tab="${tabId}"]`);
     
     if (tabContent && tabButton) {
         tabContent.classList.add('active');
         tabButton.classList.add('active');
-    }
-}
-
-// Prestige system
-function prestige() {
-    if (gameState.bubbles < 10000) return;
-    
-    const pearlsToEarn = Math.floor(Math.log10(gameState.bubbles) - 3);
-    
-    if (confirm(`Are you sure you want to prestige? You will earn ${pearlsToEarn} pearls!`)) {
-        gameState.pearls += pearlsToEarn;
-        gameState.prestigeLevel++;
-        gameState.prestigeMultiplier = 1 + (gameState.prestigeLevel * 0.05);
-        
-        // Reset game state
-        gameState.bubbles = 0;
-        gameState.upgrades = [];
-        gameState.clickValue = 1;
-        
-        playSound('prestige');
-        updateDisplay();
-        saveGame();
     }
 }
 
@@ -420,7 +263,7 @@ function loadGame() {
         // Update click counter with loaded value
         const clickCounter = document.getElementById('clickCounter');
         if (clickCounter) {
-            clickCounter.textContent = `${gameState.clickCount.toLocaleString()} Clicks`;
+            clickCounter.textContent = gameState.clickCount.toLocaleString();
         }
     }
     updateDisplay();
@@ -604,6 +447,65 @@ function showError(message) {
     `;
     document.body.appendChild(popup);
     setTimeout(() => popup.remove(), 3000);
+}
+
+// Event listeners
+function setupEventListeners() {
+    // Main fish click
+    const mainFish = document.getElementById('mainFish');
+    if (mainFish) {
+        mainFish.addEventListener('click', handleFishClick);
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+
+    // Prestige button
+    const prestigeButton = document.getElementById('prestigeButton');
+    if (prestigeButton) {
+        prestigeButton.addEventListener('click', prestige);
+    }
+
+    // Add sound toggle listener
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.addEventListener('click', () => {
+            isSoundMuted = !isSoundMuted;
+            soundToggle.textContent = isSoundMuted ? '🔇' : '🔊';
+            soundToggle.classList.toggle('muted', isSoundMuted);
+            
+            if (!isSoundMuted && audioContext?.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    }
+}
+
+// Prestige system
+function prestige() {
+    if (gameState.bubbles < 10000) return;
+    
+    const pearlsToEarn = Math.floor(Math.log10(gameState.bubbles) - 3);
+    
+    if (confirm(`Are you sure you want to prestige? You will earn ${pearlsToEarn} pearls!`)) {
+        gameState.pearls += pearlsToEarn;
+        gameState.prestigeLevel++;
+        gameState.prestigeMultiplier = 1 + (gameState.prestigeLevel * 0.05);
+        
+        // Reset game state
+        gameState.bubbles = 0;
+        gameState.upgrades = [];
+        gameState.clickValue = 1;
+        
+        playSound('prestige');
+        updateDisplay();
+        saveGame();
+    }
 }
 
 // Update the DOMContentLoaded event listener

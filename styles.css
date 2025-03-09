@@ -14,7 +14,7 @@ body {
     margin: 0 auto;
     padding: 10px;
     display: grid;
-    grid-template-rows: 40px 1fr 340px;
+    grid-template-rows: 42px 1fr auto;
     gap: 10px;
     height: 100vh;
     box-sizing: border-box;
@@ -24,11 +24,9 @@ body {
 .currency-container {
     display: flex;
     align-items: center;
-    padding: 0 15px;
-    background: rgba(0, 0, 0, 0.3);
+    padding: 0 12px;
     border-radius: 8px;
-    backdrop-filter: blur(5px);
-    height: 40px;
+    height: 42px;
     position: relative;
     z-index: 100;
 }
@@ -39,6 +37,7 @@ body {
     gap: 5px;
     font-size: 16px;
     margin-right: 15px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .sound-toggle {
@@ -63,15 +62,15 @@ body {
 .wallet-btn {
     background: #00b167;
     border: none;
-    padding: 4px 10px;
+    padding: 2px 6px;
     color: white;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer !important;
-    font-size: 12px;
+    font-size: 11px;
     margin-left: 10px;
     transition: transform 0.2s, background 0.3s;
-    min-width: 100px;
-    height: 24px;
+    min-width: 85px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -88,11 +87,10 @@ body {
 
 .wallet-btn.connected {
     background: #00986c;
-    font-size: 11px;
-    padding: 4px 8px;
-    pointer-events: auto !important;
-    opacity: 1 !important;
-    cursor: pointer !important;
+    font-size: 10px;
+    padding: 2px 6px;
+    min-width: 80px;
+    height: 18px;
 }
 
 .wallet-btn.connected:hover {
@@ -159,25 +157,22 @@ body {
 
 #clickCounter {
     position: fixed;
-    top: 120px;
+    top: 70px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.7);
     color: white;
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 24px;
+    font-size: 32px;
     font-weight: bold;
     z-index: 9999;
     text-align: center;
-    min-width: 120px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .main-fish img {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     user-select: none;
+    transform: translateY(-40px);
 }
 
 .main-fish:active {
@@ -215,29 +210,30 @@ body {
     border-radius: 12px;
     padding: 12px;
     backdrop-filter: blur(5px);
-    height: 340px;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+    height: 400px;
 }
 
 .tabs {
     display: flex;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
 }
 
 .tab-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
-    padding: 8px 16px;
+    padding: 6px 12px;
     color: white;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -254,8 +250,9 @@ body {
 .tab-content {
     display: none;
     height: calc(100% - 45px);
-    overflow: hidden;
+    overflow-y: auto;
     padding: 0;
+    flex: 1;
 }
 
 .tab-content.active {
@@ -433,6 +430,7 @@ body {
 /* NFT Inventory Styles */
 .nft-inventory {
     height: 100%;
+    overflow-y: auto;
 }
 
 .nft-inventory-grid {
@@ -472,24 +470,26 @@ body {
 .weekly-shop {
     height: 100%;
     padding: 0;
+    overflow-y: auto;
 }
 
 .weekly-shop-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    padding: 0;
 }
 
 .shop-nft-card {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    padding: 8px;
+    padding: 10px;
     text-align: center;
-    height: 200px;
+    min-height: 180px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 6px;
 }
 
 .shop-nft-card img {
@@ -542,22 +542,16 @@ body {
     margin: 8px auto 0;
 }
 
-.shop-nft-card .mint-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 177, 103, 0.3);
-    background: linear-gradient(45deg, #00c472, #00b167);
+/* Weekly Shop Headers */
+.weekly-shop h2 {
+    font-size: 14px;
+    margin: 0 0 6px 0;
 }
 
-.shop-nft-card .mint-button:disabled {
-    background: #666;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.shop-nft-card .mint-button:disabled:hover {
-    transform: none;
-    box-shadow: none;
+.weekly-shop h3 {
+    font-size: 12px;
+    margin: 0 0 6px 5px;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 @keyframes fadeIn {
@@ -586,16 +580,14 @@ body {
 /* Mobile Optimizations */
 @media (max-width: 768px) {
     .game-container {
-        padding: 5px;
-        gap: 5px;
+        grid-template-rows: 42px 1fr auto;
+        gap: 8px;
+        padding: 8px;
     }
 
     .currency-container {
-        padding: 5px 10px;
-        height: auto;
-        min-height: 40px;
-        flex-wrap: wrap;
-        gap: 10px;
+        height: 42px;
+        padding: 0 10px;
     }
 
     .currency {
@@ -605,19 +597,20 @@ body {
     }
 
     .wallet-btn {
-        font-size: 11px;
-        padding: 4px 8px;
+        height: 18px;
         min-width: 80px;
+        font-size: 10px;
+        padding: 2px 6px;
     }
 
     .main-fish img {
-        width: 150px;
-        height: 150px;
+        width: 200px;
+        height: 200px;
+        transform: translateY(-30px);
     }
 
     .shop-container {
-        height: 300px;
-        padding: 8px;
+        height: 360px;
     }
 
     .tab-btn {
@@ -635,7 +628,8 @@ body {
     }
 
     .weekly-shop-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px;
     }
 
     .shop-item {
@@ -649,8 +643,14 @@ body {
     }
 
     .shop-nft-card {
-        height: auto;
-        min-height: 180px;
+        min-height: 160px;
+        padding: 8px;
+        gap: 4px;
+    }
+
+    .shop-nft-card img {
+        width: 50px;
+        height: 50px;
     }
 
     h2 {
@@ -662,16 +662,22 @@ body {
     }
 
     #clickCounter {
-        top: 80px;
-        font-size: 20px;
-        padding: 8px 16px;
+        top: 60px;
+        font-size: 28px;
     }
 }
 
 /* Small phones */
 @media (max-width: 380px) {
+    .game-container {
+        grid-template-rows: 42px 1fr auto;
+        gap: 6px;
+        padding: 6px;
+    }
+
     .currency-container {
-        justify-content: space-between;
+        height: 42px;
+        padding: 0 8px;
     }
 
     .currency {
@@ -680,18 +686,20 @@ body {
     }
 
     .wallet-btn {
+        height: 18px;
+        min-width: 75px;
         font-size: 10px;
-        padding: 3px 6px;
-        min-width: 70px;
+        padding: 1px 4px;
     }
 
     .main-fish img {
-        width: 120px;
-        height: 120px;
+        width: 150px;
+        height: 150px;
+        transform: translateY(-20px);
     }
 
     .shop-container {
-        height: 280px;
+        height: 320px;
     }
 
     .tab-btn {
@@ -700,9 +708,23 @@ body {
     }
 
     #clickCounter {
-        top: 60px;
-        font-size: 20px;
-        padding: 8px 16px;
+        top: 50px;
+        font-size: 24px;
+    }
+
+    .weekly-shop-grid {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 6px;
+    }
+
+    .shop-nft-card {
+        min-height: 140px;
+        padding: 6px;
+    }
+
+    .shop-nft-card img {
+        width: 50px;
+        height: 50px;
     }
 }
 
@@ -737,23 +759,6 @@ button,
     .game-container {
         height: -webkit-fill-available;
     }
-}
-
-/* Prestige Section */
-.prestige-info {
-    padding: 20px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-}
-
-.prestige-info p {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.4;
 }
 
 /* Scrollbar styling */
@@ -821,18 +826,6 @@ button,
     font-size: 11px;
 }
 
-/* Weekly Shop */
-.weekly-shop h2 {
-    font-size: 14px;
-    margin: 0 0 6px 0;
-}
-
-.weekly-shop h3 {
-    font-size: 12px;
-    margin: 0 0 6px 5px;
-    color: rgba(255, 255, 255, 0.8);
-}
-
 /* Wallet button connected state */
 .wallet-btn.connected:hover {
     background: #d32f2f;
@@ -841,4 +834,21 @@ button,
 .wallet-btn-text,
 .wallet-btn-loading {
     pointer-events: none;
+}
+
+/* Prestige Section */
+.prestige-info {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.prestige-info p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
 } 
