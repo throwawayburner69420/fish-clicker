@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fish Clicker 🐠</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Load Privy integration -->
-    <script src="privy-integration.js"></script>
-    <!-- Load local mock Abstract SDK -->
-    <script src="abstract-sdk.js"></script>
 </head>
 <body>
     <div class="game-container">
@@ -21,9 +17,9 @@
                 <span id="pearls">0</span> 💎
             </div>
             <button id="soundToggle" class="sound-toggle">🔊</button>
-            <button id="abstractWalletConnect" class="wallet-btn">
-                <span class="wallet-btn-text">Connect Wallet</span>
-                <span class="wallet-btn-loading" style="display: none;">Connecting...</span>
+            <button id="walletConnect" class="wallet-btn">
+                <span class="wallet-text">Connect Wallet</span>
+                <span class="wallet-loading" style="display: none;">Connecting...</span>
             </button>
         </div>
 
@@ -99,18 +95,37 @@
         </div>
     </div>
 
+    <!-- Load Privy SDK -->
     <script>
-        // Check Abstract SDK loading status
+        window.privyConfig = {
+            loginMethods: ['wallet', 'email'],
+            appearance: {
+                theme: 'dark',
+                accentColor: '#00b167',
+                showWalletConnect: true
+            }
+        };
+    </script>
+    <script src="https://connect.privy.io/sdk"></script>
+    
+    <!-- Game Scripts -->
+    <script src="nft_system.js"></script>
+    <script src="game.js"></script>
+    <script src="wallet.js"></script>
+
+    <script>
+        // Initialize wallet manager when Privy SDK is loaded
         window.addEventListener('load', () => {
-            if (!window.AbstractWallet) {
-                console.error('Abstract SDK failed to load');
-                document.getElementById('abstractWalletConnect').classList.add('error');
-                document.querySelector('.wallet-btn-text').textContent = 'SDK Load Error';
+            console.log('Page loaded, checking for wallet manager...');
+            if (window.walletManager) {
+                console.log('Wallet manager found, initializing...');
+                window.walletManager.init().catch(error => {
+                    console.error('Failed to initialize wallet manager:', error);
+                });
+            } else {
+                console.error('Wallet manager not found');
             }
         });
     </script>
-    <script src="abstract_integration.js"></script>
-    <script src="nft_system.js"></script>
-    <script src="game.js"></script>
 </body>
 </html> 

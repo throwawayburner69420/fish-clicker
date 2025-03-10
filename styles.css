@@ -59,86 +59,6 @@ body {
     opacity: 0.5;
 }
 
-.wallet-btn {
-    background: #00b167;
-    border: none;
-    padding: 2px 6px;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer !important;
-    font-size: 11px;
-    margin-left: 10px;
-    transition: transform 0.2s, background 0.3s;
-    min-width: 85px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 101;
-    pointer-events: auto !important;
-    opacity: 1 !important;
-}
-
-.wallet-btn:hover {
-    transform: scale(1.02);
-    background: #009e5c;
-}
-
-.wallet-btn.connected {
-    background: #00986c;
-    font-size: 10px;
-    padding: 2px 6px;
-    min-width: 80px;
-    height: 18px;
-}
-
-.wallet-btn.connected:hover {
-    background: #d32f2f;
-    transform: scale(1.02);
-}
-
-.wallet-btn:disabled,
-.wallet-btn.connected:disabled,
-.wallet-btn.loading:disabled {
-    opacity: 1 !important;
-    cursor: pointer !important;
-    pointer-events: auto !important;
-    background: inherit;
-}
-
-.wallet-btn.loading {
-    opacity: 0.9;
-    cursor: wait !important;
-}
-
-.wallet-btn-text,
-.wallet-btn-loading {
-    pointer-events: none;
-    user-select: none;
-}
-
-.wallet-btn.error {
-    background: #f44336;
-}
-
-.wallet-btn-loading {
-    display: none;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
 /* Game Area */
 .game-area {
     position: relative;
@@ -580,9 +500,11 @@ body {
 /* Mobile Optimizations */
 @media (max-width: 768px) {
     .game-container {
-        grid-template-rows: 42px 1fr auto;
+        grid-template-rows: 42px minmax(200px, 1fr) auto;
         gap: 8px;
         padding: 8px;
+        height: 100%;
+        min-height: 100vh;
     }
 
     .currency-container {
@@ -596,21 +518,16 @@ body {
         white-space: nowrap;
     }
 
-    .wallet-btn {
-        height: 18px;
-        min-width: 80px;
-        font-size: 10px;
-        padding: 2px 6px;
-    }
-
     .main-fish img {
-        width: 200px;
-        height: 200px;
-        transform: translateY(-30px);
+        width: 180px;
+        height: 180px;
+        transform: translateY(-20px);
     }
 
     .shop-container {
-        height: 360px;
+        height: auto;
+        max-height: 360px;
+        margin-bottom: 20px;
     }
 
     .tab-btn {
@@ -628,8 +545,9 @@ body {
     }
 
     .weekly-shop-grid {
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 8px;
+        padding-bottom: 20px;
     }
 
     .shop-item {
@@ -665,14 +583,24 @@ body {
         top: 60px;
         font-size: 28px;
     }
+
+    .game-area {
+        min-height: 200px;
+    }
+
+    .tab-content {
+        max-height: 280px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 /* Small phones */
 @media (max-width: 380px) {
     .game-container {
-        grid-template-rows: 42px 1fr auto;
+        grid-template-rows: 42px minmax(180px, 1fr) auto;
         gap: 6px;
-        padding: 6px;
+        padding: 6px 6px 20px 6px;
     }
 
     .currency-container {
@@ -685,21 +613,15 @@ body {
         margin-right: 5px;
     }
 
-    .wallet-btn {
-        height: 18px;
-        min-width: 75px;
-        font-size: 10px;
-        padding: 1px 4px;
-    }
-
     .main-fish img {
         width: 150px;
         height: 150px;
-        transform: translateY(-20px);
+        transform: translateY(-15px);
     }
 
     .shop-container {
-        height: 320px;
+        max-height: 320px;
+        padding: 8px;
     }
 
     .tab-btn {
@@ -713,8 +635,7 @@ body {
     }
 
     .weekly-shop-grid {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 6px;
+        padding-bottom: 15px;
     }
 
     .shop-nft-card {
@@ -726,38 +647,34 @@ body {
         width: 50px;
         height: 50px;
     }
+
+    .game-area {
+        min-height: 180px;
+    }
+
+    .tab-content {
+        max-height: 250px;
+    }
 }
 
-/* Handle notched phones */
+/* Handle notched phones and safe areas */
 @supports (padding: max(0px)) {
     .game-container {
         padding-left: max(10px, env(safe-area-inset-left));
         padding-right: max(10px, env(safe-area-inset-right));
-        padding-bottom: max(10px, env(safe-area-inset-bottom));
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    .shop-container {
+        margin-bottom: max(20px, env(safe-area-inset-bottom));
     }
 }
 
-/* Touch optimizations */
-button, 
-.shop-item,
-.nft-skin-card,
-.shop-nft-card {
-    min-height: 44px; /* Minimum touch target size */
-    touch-action: manipulation;
-}
-
-.tab-content,
-.shop-items,
-.nft-inventory-grid,
-.weekly-shop-grid {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-}
-
-/* Fix viewport height issues on mobile */
+/* Fix viewport height issues on mobile Safari */
 @supports (-webkit-touch-callout: none) {
     .game-container {
         height: -webkit-fill-available;
+        min-height: -webkit-fill-available;
     }
 }
 
@@ -826,16 +743,6 @@ button,
     font-size: 11px;
 }
 
-/* Wallet button connected state */
-.wallet-btn.connected:hover {
-    background: #d32f2f;
-}
-
-.wallet-btn-text,
-.wallet-btn-loading {
-    pointer-events: none;
-}
-
 /* Prestige Section */
 .prestige-info {
     padding: 20px;
@@ -851,4 +758,85 @@ button,
     margin: 0;
     font-size: 14px;
     line-height: 1.4;
+}
+
+/* Remove old wallet button styles */
+.wallet-btn,
+.wallet-btn-text,
+.wallet-btn-loading,
+.wallet-btn.connected,
+.wallet-btn.error {
+    display: block;
+}
+
+/* Wallet Button Styles */
+.wallet-btn {
+    background: #00b167;
+    border: none;
+    padding: 6px 12px;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 10px;
+    transition: all 0.3s;
+    min-width: 120px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.wallet-btn:hover {
+    background: #009e5c;
+    transform: translateY(-1px);
+}
+
+.wallet-btn.connected {
+    background: #00986c;
+}
+
+.wallet-btn.connected:hover {
+    background: #d32f2f;
+}
+
+.wallet-btn.loading {
+    opacity: 0.8;
+    cursor: wait;
+}
+
+.wallet-text,
+.wallet-loading {
+    pointer-events: none;
+}
+
+.wallet-loading {
+    display: none;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .wallet-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+        min-width: 100px;
+        height: 28px;
+    }
+}
+
+@media (max-width: 380px) {
+    .wallet-btn {
+        padding: 4px 6px;
+        font-size: 11px;
+        min-width: 90px;
+        height: 26px;
+    }
 } 
